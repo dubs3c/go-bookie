@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"strings"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -61,7 +61,16 @@ func main() {
 		})
 	})
 
-	http.ListenAndServe(":8000", r)
+	HTTPServer := &http.Server{
+		Addr:           "127.0.0.1:8080",
+		Handler:        r,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	log.Printf("[+] Starting server on %s...", HTTPServer.Addr)
+	HTTPServer.ListenAndServe()
 }
 
 // CreateBookmark api
@@ -88,7 +97,7 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 
 // ListBookmarks Return all bookmarks
 func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
-	var bookmarks []Bookmark
+	var bookmarks []*Bookmark
 	rows, err := s.DB.Query(context.Background(), "select id, title, description, body, image, url, archived, deleted from bookmarks")
 
 	if err != nil {
@@ -104,36 +113,57 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		bookmarks = append(bookmarks, *n)
+		bookmarks = append(bookmarks, n)
 	}
-	BookmarksJSON, _ := json.Marshal(bookmarks)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(BookmarksJSON)
+
+	if err := render.RenderList(w, r, NewBookmarkListResponse(bookmarks)); err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
+
 }
 
 // Bind aaa
 func (a *BookmarkRequest) Bind(r *http.Request) error {
-	// a.Article is nil if no Article fields are sent in the request. Return an
+	// a.Bookmark is nil if no Bookmark fields are sent in the request. Return an
 	// error to avoid a nil pointer dereference.
 	if a.Bookmark == nil {
 		return errors.New("missing required Bookmark fields")
 	}
 
-	// a.User is nil if no Userpayload fields are sent in the request. In this app
-	// this won't cause a panic, but checks in this Bind method may be required if
-	// a.User or futher nested fields like a.User.Name are accessed elsewhere.
+	a.ProtectedID = "" // unset the protected ID
 
-	// just a post-process after a decode..
-	a.ProtectedID = ""                                   // unset the protected ID
-	a.Bookmark.Title = strings.ToLower(a.Bookmark.Title) // as an example, we down-case
 	return nil
 }
+
+func NewBookmarkListResponse(bookmarks []*Bookmark) []render.Renderer {
+	list := []render.Renderer{}
+	for _, bookmark := range bookmarks {
+		list = append(list, NewBookmarkResponse(bookmark))
+	}
+	return list
+}
+
+func NewBookmarkResponse(bookmark *Bookmark) *BookmarkResponse {
+	resp := &BookmarkResponse{Bookmark: bookmark}
+	return resp
+}
+
+/* ------------- Render methods Requests ------------- */
 
 // Render an error response
 func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.HTTPStatusCode)
 	return nil
 }
+
+func (rd *BookmarkResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	// Pre-processing before a response is marshalled and sent across the wire
+	rd.Elapsed = 10
+	return nil
+}
+
+/* ------------- ERROR Requests ------------- */
 
 // ErrInvalidRequest aaa
 func ErrInvalidRequest(err error) render.Renderer {
@@ -151,5 +181,14 @@ func GeneralErrRequest(err string) render.Renderer {
 		HTTPStatusCode: 500,
 		StatusText:     "Server Error.",
 		ErrorText:      err,
+	}
+}
+
+func ErrRender(err error) render.Renderer {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: 422,
+		StatusText:     "Error rendering response.",
+		ErrorText:      err.Error(),
 	}
 }

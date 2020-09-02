@@ -23,6 +23,16 @@ type BookmarkRequest struct {
 	ProtectedID string `json:"id"` // override 'id' json to have more control
 }
 
+type BookmarkResponse struct {
+	*Bookmark
+
+	//User *UserPayload `json:"user,omitempty"`
+
+	// We add an additional field to the response here.. such as this
+	// elapsed computed property
+	Elapsed int64 `json:"elapsed"`
+}
+
 // ErrResponse err
 type ErrResponse struct {
 	Err            error `json:"-"` // low-level runtime error
