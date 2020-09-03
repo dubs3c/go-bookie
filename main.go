@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,8 +11,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
 	"github.com/jackc/pgx/v4/pgxpool"
+	jsoniter "github.com/json-iterator/go"
 )
 
 // Server struct
@@ -75,37 +75,35 @@ func main() {
 
 // CreateBookmark api
 func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
-	data := &BookmarkRequest{}
-	if err := render.Bind(r, data); err != nil {
-		render.Render(w, r, ErrInvalidRequest(err))
-		return
+	data := &Bookmark{}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	if err := json.NewDecoder(r.Body).Decode(data); err != nil {
+		respondWithError(w, 400, "Could not decode json")
 	}
 
-	res, err := s.DB.Exec(context.Background(), "insert into bookmarks(title,description,body,image,url,archived,deleted) values($1,$2,$3,$4,$5,$6,$7)", data.Title, data.Description, data.Body, data.Image, data.URL, data.Archived, data.Deleted)
+	res, err := s.DB.Exec(context.Background(), "INSERT INTO bookmarks(title,description,body,image,url,archived,deleted) values($1,$2,$3,$4,$5,$6,$7)", data.Title, data.Description, data.Body, data.Image, data.URL, data.Archived, data.Deleted)
 
 	if err != nil {
-		render.Render(w, r, ErrInvalidRequest(err))
-		return
+		respondWithError(w, 500, "Could not create bookmark")
 	}
 
 	if res.RowsAffected() != 1 {
-		fmt.Println("Did not insert row")
-		render.Render(w, r, GeneralErrRequest("Something went wrong inserting to db"))
-		return
+		respondWithError(w, 500, "Bookmark was not")
 	}
+
+	respondWithStatusCode(w, 201)
 }
 
 // ListBookmarks Return all bookmarks
 func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 	var bookmarks []*Bookmark
 	rows, err := s.DB.Query(context.Background(), "select id, title, description, body, image, url, archived, deleted from bookmarks")
+	defer rows.Close()
 
 	if err != nil {
-		render.Render(w, r, ErrInvalidRequest(err))
-		return
+		respondWithError(w, 500, "Something went wrong while fetching bookmarks")
 	}
-
-	defer rows.Close()
 
 	for rows.Next() {
 		n := new(Bookmark)
@@ -116,79 +114,22 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 		bookmarks = append(bookmarks, n)
 	}
 
-	if err := render.RenderList(w, r, NewBookmarkListResponse(bookmarks)); err != nil {
-		render.Render(w, r, ErrRender(err))
-		return
-	}
-
+	respondWithJson(w, 200, bookmarks)
 }
 
-// Bind aaa
-func (a *BookmarkRequest) Bind(r *http.Request) error {
-	// a.Bookmark is nil if no Bookmark fields are sent in the request. Return an
-	// error to avoid a nil pointer dereference.
-	if a.Bookmark == nil {
-		return errors.New("missing required Bookmark fields")
-	}
-
-	a.ProtectedID = "" // unset the protected ID
-
-	return nil
+func respondWithError(w http.ResponseWriter, code int, msg string) {
+	respondWithJson(w, code, map[string]string{"error": msg})
 }
 
-func NewBookmarkListResponse(bookmarks []*Bookmark) []render.Renderer {
-	list := []render.Renderer{}
-	for _, bookmark := range bookmarks {
-		list = append(list, NewBookmarkResponse(bookmark))
-	}
-	return list
+func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
 }
 
-func NewBookmarkResponse(bookmark *Bookmark) *BookmarkResponse {
-	resp := &BookmarkResponse{Bookmark: bookmark}
-	return resp
-}
-
-/* ------------- Render methods Requests ------------- */
-
-// Render an error response
-func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	render.Status(r, e.HTTPStatusCode)
-	return nil
-}
-
-func (rd *BookmarkResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	// Pre-processing before a response is marshalled and sent across the wire
-	rd.Elapsed = 10
-	return nil
-}
-
-/* ------------- ERROR Requests ------------- */
-
-// ErrInvalidRequest aaa
-func ErrInvalidRequest(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: 400,
-		StatusText:     "Invalid request.",
-		ErrorText:      err.Error(),
-	}
-}
-
-// GeneralErrRequest gen err
-func GeneralErrRequest(err string) render.Renderer {
-	return &ErrResponse{
-		HTTPStatusCode: 500,
-		StatusText:     "Server Error.",
-		ErrorText:      err,
-	}
-}
-
-func ErrRender(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: 422,
-		StatusText:     "Error rendering response.",
-		ErrorText:      err.Error(),
-	}
+func respondWithStatusCode(w http.ResponseWriter, code int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	return
 }
