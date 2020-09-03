@@ -1,4 +1,4 @@
-package main
+package gobookie
 
 // Bookmark Models
 type Bookmark struct {
