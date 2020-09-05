@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
+	goose "github.com/advancedlogic/GoOse"
 	"github.com/go-chi/chi"
 	"github.com/jackc/pgx/v4/pgxpool"
 	jsoniter "github.com/json-iterator/go"
@@ -13,12 +15,27 @@ import (
 
 // Server struct
 type Server struct {
-	Context context.Context
-	DB      *pgxpool.Pool
-	Router  *chi.Mux
+	DB     *pgxpool.Pool
+	Router *chi.Mux
 }
 
-// CreateBookmark api
+func getarticle(ctx context.Context, db *pgxpool.Pool, id int, url string) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(time.Second*5))
+	defer cancel()
+	g := goose.New()
+	article, err := g.ExtractFromURL(url)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(ctx, "UPDATE bookmarks SET body=$2, title=$3, description=$4, image=$5 WHERE id=$1", id, article.RawHTML, article.Title, article.MetaDescription, article.TopImage)
+	if err != nil {
+		cancel()
+		return err
+	}
+	return nil
+}
+
+// CreateBookmark Create bookmark
 func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 	data := &Bookmark{}
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -27,14 +44,21 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 400, "Could not decode json")
 	}
 
-	RowsAffected, err := s.BookmarkRepositoryInsert(data)
+	LastInsertedID, err := s.BookmarkRepositoryInsert(data)
+
+	go func() {
+		err := getarticle(context.Background(), s.DB, LastInsertedID, data.URL)
+		if err != nil {
+			log.Printf("ERROR: Could not fetch website %s: %s", data.URL, err.Error())
+		}
+	}()
 
 	if err != nil {
 		respondWithError(w, 500, "Could not create bookmark")
 		return
 	}
 
-	if RowsAffected != 1 {
+	if LastInsertedID == 0 {
 		respondWithError(w, 500, "Bookmark was not created")
 		return
 	}
@@ -52,7 +76,7 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJson(w, 200, bookmarks)
+	respondWithJSON(w, 200, bookmarks)
 }
 
 // GetBookmark Get a specific bookmark by its ID
@@ -72,7 +96,7 @@ func (s *Server) GetBookmark(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJson(w, 200, bookmark)
+	respondWithJSON(w, 200, bookmark)
 }
 
 // DeleteBookmark Delete a specific bookmark by its ID
@@ -86,9 +110,10 @@ func (s *Server) DeleteBookmark(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJson(w, 200, bookmark)
+	respondWithJSON(w, 200, bookmark)
 }
 
+// UpdateBookmark Update a bookmark by its ID
 func (s *Server) UpdateBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmarkID := chi.URLParam(r, "bookmarkID")
 
@@ -126,10 +151,10 @@ func (s *Server) UpdateBookmark(w http.ResponseWriter, r *http.Request) {
 /* ----------------- Response methods ----------------- */
 
 func respondWithError(w http.ResponseWriter, code int, msg string) {
-	respondWithJson(w, code, map[string]string{"error": msg})
+	respondWithJSON(w, code, map[string]string{"error": msg})
 }
 
-func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)

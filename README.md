@@ -1,5 +1,7 @@
 # go-bookie
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/dubs3c/go-bookie)](https://goreportcard.com/report/github.com/dubs3c/go-bookie)
+
 A new version of bookie, written in Go :)
 
 **Run docker container**
