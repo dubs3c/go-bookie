@@ -52,6 +52,7 @@ func main() {
 			r.Route("/{bookmarkID}", func(r chi.Router) {
 				r.Get("/", s.GetBookmark)
 				r.Put("/", s.UpdateBookmark)
+				r.Patch("/", s.UpdateBookmark)
 				r.Delete("/", s.DeleteBookmark)
 			})
 		})

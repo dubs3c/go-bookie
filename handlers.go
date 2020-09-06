@@ -2,9 +2,10 @@ package gobookie
 
 import (
 	"context"
-	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"reflect"
 	"time"
 
 	goose "github.com/advancedlogic/GoOse"
@@ -37,11 +38,16 @@ func getarticle(ctx context.Context, db *pgxpool.Pool, id int, url string) error
 
 // CreateBookmark Create bookmark
 func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
-	data := &Bookmark{}
+	data := &CreateBookmarkRequest{}
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 	if err := json.NewDecoder(r.Body).Decode(data); err != nil {
-		respondWithError(w, 400, "Could not decode json")
+		RespondWithError(w, 400, "Could not decode json")
+	}
+
+	if data.URL == "" {
+		RespondWithError(w, 400, "You need to enter a URL")
+		return
 	}
 
 	LastInsertedID, err := s.BookmarkRepositoryInsert(data)
@@ -54,16 +60,16 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if err != nil {
-		respondWithError(w, 500, "Could not create bookmark")
+		RespondWithError(w, 500, "Could not create bookmark")
 		return
 	}
 
 	if LastInsertedID == 0 {
-		respondWithError(w, 500, "Bookmark was not created")
+		RespondWithError(w, 500, "Bookmark was not created")
 		return
 	}
 
-	respondWithStatusCode(w, 201)
+	RespondWithStatusCode(w, 201)
 }
 
 // ListBookmarks Return all bookmarks
@@ -72,11 +78,11 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks()
 
 	if err != nil {
-		respondWithError(w, 500, "Something went wrong while fetching bookmarks")
+		RespondWithError(w, 500, "Something went wrong while fetching bookmarks")
 		return
 	}
 
-	respondWithJSON(w, 200, bookmarks)
+	RespondWithJSON(w, 200, bookmarks)
 }
 
 // GetBookmark Get a specific bookmark by its ID
@@ -86,17 +92,17 @@ func (s *Server) GetBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmark, err := s.BookmarkRepositoryGetBookmarkByID(bookmarkID)
 
 	if bookmark == (Bookmark{}) {
-		respondWithStatusCode(w, 404)
+		RespondWithStatusCode(w, 404)
 		return
 	}
 
 	if err != nil {
 		log.Println(err)
-		respondWithError(w, 500, "Could not fetch bookmark")
+		RespondWithError(w, 500, "Could not fetch bookmark")
 		return
 	}
 
-	respondWithJSON(w, 200, bookmark)
+	RespondWithJSON(w, 200, bookmark)
 }
 
 // DeleteBookmark Delete a specific bookmark by its ID
@@ -106,64 +112,104 @@ func (s *Server) DeleteBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmark, err := s.BookmarkRepositoryDeleteBookmarkByID(bookmarkID)
 
 	if err != nil {
-		respondWithError(w, 500, "Could not delete bookmark")
+		RespondWithError(w, 500, "Could not delete bookmark")
 		return
 	}
 
-	respondWithJSON(w, 200, bookmark)
+	RespondWithJSON(w, 200, bookmark)
 }
 
 // UpdateBookmark Update a bookmark by its ID
 func (s *Server) UpdateBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmarkID := chi.URLParam(r, "bookmarkID")
 
-	data := &Bookmark{}
+	var data UpdateBookmarkRequest
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-	if err := json.NewDecoder(r.Body).Decode(data); err != nil {
-		respondWithError(w, 400, "Could not decode json")
+	defer r.Body.Close()
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
+
+	log.Println(string(bodyBytes))
+
+	if err := json.Unmarshal(bodyBytes, &data); err != nil {
+		log.Println(data)
+		log.Println(err.Error())
+		RespondWithError(w, 400, "Could not decode json")
 		return
 	}
 
 	bookmark, err := s.BookmarkRepositoryGetBookmarkByID(bookmarkID)
 
 	if err != nil {
-		respondWithError(w, 500, "Could not fetch bookmark")
+		RespondWithError(w, 500, "Could not fetch bookmark")
 		return
 	}
 
-	bookmark.Archived = data.Archived
-	bookmark.Body = data.Body
-	bookmark.Deleted = data.Deleted
-	bookmark.Description = data.Description
-	bookmark.Image = data.Image
-	bookmark.Title = data.Title
-	bookmark.URL = data.URL
+	// Because PUT and PATCH performs identical operations,
+	// this is an easy way to perform different database
+	// operations based on the method.
+	switch r.Method {
+	case "PUT":
 
-	if err = s.BookmarkRepositoryUpdateBookmark(bookmark); err != nil {
-		respondWithError(w, 500, "Could not update bookmark")
+		if data.Archived != nil {
+			bookmark.Archived = *data.Archived
+		}
+		if data.Deleted != nil {
+			bookmark.Deleted = *data.Deleted
+		}
+		bookmark.Body = data.Body
+		bookmark.Description = data.Description
+		bookmark.Image = data.Image
+		bookmark.Title = data.Title
+		bookmark.URL = data.URL
+
+		if err = s.BookmarkRepositoryUpdateBookmark(bookmark); err != nil {
+			RespondWithError(w, 500, "Could not update bookmark")
+			return
+		}
+	case "PATCH":
+		log.Println(bookmark)
+		fuck(data, &bookmark)
+		log.Println(bookmark)
+		if err = s.BookmarkRepositoryPatchBookmark(bookmark); err != nil {
+			RespondWithError(w, 500, "Could not patch bookmark")
+			return
+		}
+	default:
+		RespondWithStatusCode(w, 400)
 		return
 	}
 
-	respondWithStatusCode(w, 200)
+	RespondWithStatusCode(w, 200)
 }
 
-/* ----------------- Response methods ----------------- */
+func fuck(v interface{}, bookmark *Bookmark) {
+	t := reflect.ValueOf(v)
+	if !t.IsValid() {
+		log.Println("src reflect not valid")
+		return
+	}
 
-func respondWithError(w http.ResponseWriter, code int, msg string) {
-	respondWithJSON(w, code, map[string]string{"error": msg})
-}
+	bm := reflect.ValueOf(bookmark).Elem()
+	if !bm.IsValid() {
+		log.Println("src reflect not valid")
+		return
+	}
 
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, _ := json.Marshal(payload)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
-	return
-}
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Kind() == reflect.String {
+			if t.Field(i).String() != "" {
+				fieldName := t.Type().Field(i).Name
+				x := bm.FieldByName(fieldName)
+				if x.IsValid() {
+					if !x.CanSet() {
+						log.Println("ERROR: Can not update destintion struct")
+						return
+					}
+					x.SetString(t.Field(i).String())
+				}
 
-func respondWithStatusCode(w http.ResponseWriter, code int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	return
+			}
+		}
+	}
 }

@@ -9,9 +9,9 @@ import (
 )
 
 // BookmarkRepositoryInsert - Insert bookmark into database
-func (s *Server) BookmarkRepositoryInsert(bookmark *Bookmark) (int, error) {
+func (s *Server) BookmarkRepositoryInsert(bookmark *CreateBookmarkRequest) (int, error) {
 	var last int = 0
-	err := s.DB.QueryRow(context.Background(), "INSERT INTO bookmarks(title,description,body,image,url,archived,deleted) values($1,$2,$3,$4,$5,$6,$7) RETURNING id", bookmark.Title, bookmark.Description, bookmark.Body, bookmark.Image, bookmark.URL, bookmark.Archived, bookmark.Deleted).Scan(&last)
+	err := s.DB.QueryRow(context.Background(), "INSERT INTO bookmarks(url) values($1) RETURNING id", bookmark.URL).Scan(&last)
 	return last, err
 }
 
@@ -63,6 +63,26 @@ func (s *Server) BookmarkRepositoryDeleteBookmarkByID(bookmarkID string) (int64,
 // BookmarkRepositoryUpdateBookmark - Update a specifc bookmark by its database id
 func (s *Server) BookmarkRepositoryUpdateBookmark(bookmark Bookmark) error {
 	res, err := s.DB.Exec(context.Background(), "UPDATE bookmarks SET title=$1, description=$2, body=$3, image=$4, url=$5, archived=$6, deleted=$7 WHERE id=$8", bookmark.Title, bookmark.Description, bookmark.Body, bookmark.Image, bookmark.URL, bookmark.Archived, bookmark.Deleted, bookmark.ID)
+
+	if res.RowsAffected() != 1 {
+		return err
+	}
+
+	return nil
+}
+
+// BookmarkRepositoryPatchBookmark - Patch a specifc bookmark by its database id
+func (s *Server) BookmarkRepositoryPatchBookmark(bookmark Bookmark) error {
+	sql := `UPDATE bookmarks SET
+  			title = COALESCE($1, title),
+			description = COALESCE($2, description),
+  			body = COALESCE($3, body),
+  			image = COALESCE($4, image),
+			url = COALESCE($5, url),
+			archived = COALESCE($6, archived),
+  			deleted = COALESCE($7, deleted)
+			WHERE id = $8;`
+	res, err := s.DB.Exec(context.Background(), sql, bookmark.Title, bookmark.Description, bookmark.Body, bookmark.Image, bookmark.URL, bookmark.Archived, bookmark.Deleted, bookmark.ID)
 
 	if res.RowsAffected() != 1 {
 		return err
