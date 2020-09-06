@@ -1,10 +1,11 @@
 <h1 align="center">Go-Bookie</h1>
 <p align="center">
+<a href="https://goreportcard.com/badge/github.com/dubs3c/go-bookie"><img src="https://goreportcard.com/badge/github.com/dubs3c/go-bookie"></a>
+<a href="https://img.shields.io/github/workflow/status/dubs3c/go-bookie/Go"><img src="https://img.shields.io/github/workflow/status/dubs3c/go-bookie/Go"></a>
+</p>
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/dubs3c/go-bookie)](https://goreportcard.com/report/github.com/dubs3c/go-bookie) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dubs3c/go-bookie/Go)
-
+<p align="center">
 A new version of bookie, written in Go :)
-
 </p>
 
 
