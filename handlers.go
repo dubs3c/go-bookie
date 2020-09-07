@@ -128,13 +128,14 @@ func (s *Server) UpdateBookmark(w http.ResponseWriter, r *http.Request) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 	defer r.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	bodyBytes, err := ioutil.ReadAll(r.Body)
 
-	log.Println(string(bodyBytes))
+	if err != nil {
+		RespondWithError(w, 400, "Could not read json")
+		return
+	}
 
 	if err := json.Unmarshal(bodyBytes, &data); err != nil {
-		log.Println(data)
-		log.Println(err.Error())
 		RespondWithError(w, 400, "Could not decode json")
 		return
 	}
@@ -191,6 +192,9 @@ func Error(msg string) error {
 	return errors.New(msg)
 }
 
+// Patch - Update a destination struct with non empty values from a src struct
+// This function looks at src and takes the non empty values
+// and assigns it to dst on the correct field
 func patch(v interface{}, bookmark *Bookmark) error {
 	src := reflect.ValueOf(v)
 	if !src.IsValid() {
