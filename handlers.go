@@ -2,6 +2,7 @@ package gobookie
 
 import (
 	"context"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -168,9 +169,11 @@ func (s *Server) UpdateBookmark(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "PATCH":
-		log.Println(bookmark)
-		fuck(data, &bookmark)
-		log.Println(bookmark)
+		err := patch(data, &bookmark)
+		if err != nil {
+			RespondWithError(w, 500, "Something went wrong when trying to patch bookmark...")
+			return
+		}
 		if err = s.BookmarkRepositoryPatchBookmark(bookmark); err != nil {
 			RespondWithError(w, 500, "Could not patch bookmark")
 			return
@@ -183,33 +186,56 @@ func (s *Server) UpdateBookmark(w http.ResponseWriter, r *http.Request) {
 	RespondWithStatusCode(w, 200)
 }
 
-func fuck(v interface{}, bookmark *Bookmark) {
-	t := reflect.ValueOf(v)
-	if !t.IsValid() {
-		log.Println("src reflect not valid")
-		return
+// Error - A function that returns a custom error message
+func Error(msg string) error {
+	return errors.New(msg)
+}
+
+func patch(v interface{}, bookmark *Bookmark) error {
+	src := reflect.ValueOf(v)
+	if !src.IsValid() {
+		return Error("src reflect not valid")
 	}
 
-	bm := reflect.ValueOf(bookmark).Elem()
-	if !bm.IsValid() {
-		log.Println("src reflect not valid")
-		return
+	if src.Type().Kind() != reflect.Struct {
+		return Error("src parameter is not a struct")
 	}
 
-	for i := 0; i < t.NumField(); i++ {
-		if t.Field(i).Kind() == reflect.String {
-			if t.Field(i).String() != "" {
-				fieldName := t.Type().Field(i).Name
-				x := bm.FieldByName(fieldName)
+	dst := reflect.ValueOf(bookmark).Elem()
+	if !dst.IsValid() {
+		return Error("dst reflect not valid")
+	}
+
+	for i := 0; i < src.NumField(); i++ {
+		if src.Field(i).Kind() == reflect.String {
+			if src.Field(i).String() != "" {
+				fieldName := src.Type().Field(i).Name
+				x := dst.FieldByName(fieldName)
 				if x.IsValid() {
 					if !x.CanSet() {
-						log.Println("ERROR: Can not update destintion struct")
-						return
+						return Error("ERROR: Can not update destintion struct")
 					}
-					x.SetString(t.Field(i).String())
+					x.SetString(src.Field(i).String())
 				}
+			}
+		}
 
+		if src.Field(i).Kind() == reflect.Ptr {
+			l := src.Field(i).Elem()
+			if l.IsValid() {
+				fieldPointer := reflect.Indirect(src.Field(i))
+				if fieldPointer.Type().Kind() == reflect.Bool {
+					fieldName := src.Type().Field(i).Name
+					x := dst.FieldByName(fieldName)
+
+					if !x.CanSet() {
+						return Error("ERROR: Can not update destintion struct")
+					}
+
+					x.SetBool(fieldPointer.Bool())
+				}
 			}
 		}
 	}
+	return nil
 }
