@@ -1,0 +1,46 @@
+
+.btn {
+    padding: .375rem .75rem;
+    height: 30px;
+    border-radius: .25rem;
+    background-color: dodgerblue;
+    border: 1px solid blue;
+    margin-left: 1em;
+    color: white;
+    box-shadow: 0 3px rgb(37, 37, 37);
+    font-weight: bold;
+}
+
+.btn:active {
+    background-color: rgb(14, 14, 214);
+    box-shadow: 0 1px #666;
+    transform: translateY(4px);
+}
+
+.btn:hover {
+    background-color:rgb(28, 124, 219);
+}
+
+.btn.large {
+    font-size: 24px;
+    padding: .1em 1em 1.4em 1em;
+}
+
+.btn.fullWidth {
+    width: 100%;
+}
+
+.btn.danger {
+    background-color: rgb(219, 26, 26);
+    border: 1px solid rgb(255, 0, 0);
+}
+
+.btn.danger:active {
+    background-color: rgb(214, 14, 14);
+    box-shadow: 0 1px #666;
+    transform: translateY(4px);
+}
+
+.btn.danger:hover {
+    background-color:rgb(255, 34, 34);
+}

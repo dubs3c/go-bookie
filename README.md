@@ -18,3 +18,15 @@ docker run -e POSTGRES_PASSWORD=bookie -e POSTGRES_USER=bookie -e POSTGRES_DB=bo
 ```
 migrate -database postgres://bookie:bookie@localhost:5432/bookie?sslmode=disable -path migrations up
 ```
+
+## Frontend
+
+**Run svelte**
+```
+npm run dev
+```
+
+**Run storybook**
+```
+npm run storybook
+```
