@@ -14,8 +14,9 @@ export const defaultBookmarksData = [
   { ...bookmarkData, id: '5', title: 'These are not the droids', url: 'https://localhost.com', image: "image", description: "desc", archived: false , deleted: false },
   { ...bookmarkData, id: '6', title: 'Funny cat videos', url: 'https://youtube.com', image: "image", description: "desc", archived: false , deleted: false },
 ];
-export const deletedBookmarksData = [
-  ...defaultBookmarksData.slice(0, 5),
+export const mixedBookmarksData = [
+  ...defaultBookmarksData.slice(0, 4),
+  { id: '5', title: 'These are not the droids', url: 'https://youtube.com', image: "image", description: "desc", archived: true , deleted: false },
   { id: '6', title: 'Funny cat videos', url: 'https://youtube.com', image: "image", description: "desc", archived: false , deleted: true },
 ];
 
@@ -29,24 +30,24 @@ export const Default = () => ({
     ...actionsData,
   },
 });
-// tasklist with pinned tasks
-export const DeletedBookmarks = () => ({
+
+export const MixedBookmarks = () => ({
   Component: BookmarkList,
   props: {
-    bookmarks: deletedBookmarksData,
+    bookmarks: mixedBookmarksData,
   },
   on: {
     ...actionsData,
   },
 });
-// BookmarkList in loading state
+
 export const Loading = () => ({
   Component: BookmarkList,
   props: {
     loading: true,
   },
 });
-// BookmarkList no tasks
+
 export const Empty = () => ({
   Component: BookmarkList,
 });
