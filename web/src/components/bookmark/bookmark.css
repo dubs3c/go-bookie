@@ -36,6 +36,10 @@
     font-size: smaller;
 }
 
+.bookmark .actions i {
+    cursor: pointer;
+}
+
 .bookmark .actions .view:hover {
     color: #007bff;
 }
@@ -50,4 +54,14 @@
 
 .bookmark small {
     color: rgb(185, 185, 185);
+}
+
+.bookmark .actions .red {
+    color: #f5495a;
+    font-weight: bold;
+}
+
+.bookmark .actions .green {
+    color: #23e16f;
+    font-weight: bold;
 }
