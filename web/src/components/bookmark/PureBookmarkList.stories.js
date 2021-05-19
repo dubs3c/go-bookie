@@ -1,5 +1,5 @@
 
-import BookmarkList from './BookmarkList.svelte';
+import PureBookmarkList from './PureBookmarkList.svelte';
 import { bookmarkData, actionsData } from './Bookmark.stories';
 export default {
   title: 'Bookie/BookmarkList',
@@ -22,7 +22,7 @@ export const mixedBookmarksData = [
 
 // default TaskList state
 export const Default = () => ({
-  Component: BookmarkList,
+  Component: PureBookmarkList,
   props: {
     bookmarks: defaultBookmarksData,
   },
@@ -32,7 +32,7 @@ export const Default = () => ({
 });
 
 export const MixedBookmarks = () => ({
-  Component: BookmarkList,
+  Component: PureBookmarkList,
   props: {
     bookmarks: mixedBookmarksData,
   },
@@ -42,12 +42,12 @@ export const MixedBookmarks = () => ({
 });
 
 export const Loading = () => ({
-  Component: BookmarkList,
+  Component: PureBookmarkList,
   props: {
     loading: true,
   },
 });
 
 export const Empty = () => ({
-  Component: BookmarkList,
+  Component: PureBookmarkList,
 });

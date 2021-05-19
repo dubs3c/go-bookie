@@ -1,30 +1,87 @@
 <script lang="ts">
-	export let name: string;
+import Bookmark from "./components/bookmark/Bookmark.svelte";
+import BookmarkScreen from "./components/bookmark/BookmarkScreen.svelte";
+import PureBookmarkList from "./components/bookmark/PureBookmarkList.svelte";
+import Button from "./components/button/Button.svelte";
+import Card from "./components/card/Card.svelte";
+import Input from "./components/input/Input.svelte";
+import Tag from "./components/tag/Tag.svelte";
+
+
+// Bookmark props
+let bookmark = {
+	id: '1',
+	title: 'yeee',
+	url: "",
+	description: "",
+	image: "",
+	archived: false,
+	deleted: false
+};
+
+let b = [bookmark]
+
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	<div class="row">
+		<div class="col">
+			<h1>Go-Bookie!</h1>
+			<hr />
+		</div>
+	</div>
+
+	<Card>
+
+
+		<div class="row">
+			<div class="col">
+				<h4>Filter</h4>
+				<ul class="filter-list">
+					<li><a href="?filter=unread"><i class="fas fa-angle-right"></i> Unread</a></li>
+					<li><a href="?filter=read"><i class="fas fa-angle-right"></i> Read</a></li>
+				</ul>
+			</div>
+			<div class="col lol">
+				<h4>Save a link!</h4>
+				<Input placeholder="Enter URL or some text"/>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col">
+				<h4>Tags</h4>
+				<Tag value="APT"/>
+				<Tag value="Spring Boot"/>
+				<Tag value="Golang"/>
+			</div>
+		</div>
+
+		<br />
+
+		<Button value="Filter on tag"/>
+
+
+	</Card>
+	
+	<br />
+	
+	<div class="row">
+		<div class="col">
+			<BookmarkScreen/>
+		</div>
+	</div>
+
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
+
+	.filter-list li {
+		list-style: none;
 	}
 
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
+	.lol {
+		width: 80%;
 	}
 
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
 </style>

@@ -14,14 +14,25 @@ const Bookmarks = () => {
     subscribe,
     // method to archive a task, think of a action with redux or Vuex
     archiveTask: id =>
-      update(tasks =>
-        tasks.map(task => (task.id === id ? { ...task, archived: true } : task))
+      update(bookmarks =>
+        bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, archived: true } : bookmark))
       ),
-    // method to archive a task, think of a action with redux or Vuex
+    // method to archive a bookmark, think of a action with redux or Vuex
     pinTask: id =>
-      update(tasks =>
-        tasks.map(task => (task.id === id ? { ...task, deleted: false } : task))
+      update(bookmarks =>
+        bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, deleted: false } : bookmark))
       ),
   };
 };
 export const bookmarkStore = Bookmarks();
+
+// store to handle the app state
+const appState = () => {
+  const { subscribe, update } = writable(false);
+  return {
+    subscribe,
+    error: () => update(error => !error),
+  };
+};
+
+export const AppStore = appState();

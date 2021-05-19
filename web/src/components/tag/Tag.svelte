@@ -4,12 +4,11 @@
     export let deletable = false
 </script>
 
-<div class="tag-container">
-    <div class="tag">
-        {value}
 
-        {#if deletable}
+<span class="tag">
+    {value}
+
+    {#if deletable}
         <i class="close" title="Delete">x</i>
-        {/if}
-    </div>
-</div>
+    {/if}
+</span>

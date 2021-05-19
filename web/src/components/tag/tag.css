@@ -4,11 +4,13 @@
     background: #e8ecef;
     color: #4d5c6c;
     padding: .5em;
-    width: fit-content;
+    display: inline-block;
     border-radius: .3em;
     font-weight: bold;
     font-size: 75%;
     font-weight: 700;
+    margin: 0.2em;
+    cursor: pointer;
 }
 
 .tag:hover {

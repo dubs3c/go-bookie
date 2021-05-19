@@ -1,18 +1,18 @@
 <script>
-    import Bookmark from './Bookmark.svelte';
-    export let loading = false;
-    export let bookmarks = [];
-  
-    // reactive declarations (computed prop in other frameworks)
-    $: noBookmarks = bookmarks.length === 0;
-    $: emptyBookmarks = bookmarks.length === 0 && !loading;
-  </script>
-  {#if loading}
-    <div class="list-items">loading</div>
-  {/if}
-  {#if emptyBookmarks}
-    <div class="list-items">empty</div>
-  {/if}
-  {#each bookmarks as bookmark}
-    <Bookmark {bookmark}/>
-  {/each}
+  import PureBookmarkList from './PureBookmarkList.svelte';
+  import { bookmarkStore } from '../../store';
+  function onPinTask(event) {
+    taskStore.pinTask(event.detail.id);
+  }
+  function onArchiveTask(event) {
+    taskStore.archiveTask(event.detail.id);
+  }
+</script>
+
+<div>
+  <PureBookmarkList
+    bookmarks={$bookmarkStore}
+    on:onPinTask={onPinTask}
+    on:onArchiveTask={onArchiveTask}
+  />
+</div>
