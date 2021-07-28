@@ -1,25 +1,11 @@
 <script lang="ts">
-import Bookmark from "./components/bookmark/Bookmark.svelte";
 import BookmarkScreen from "./components/bookmark/BookmarkScreen.svelte";
-import PureBookmarkList from "./components/bookmark/PureBookmarkList.svelte";
 import Button from "./components/button/Button.svelte";
 import Card from "./components/card/Card.svelte";
 import Input from "./components/input/Input.svelte";
 import Tag from "./components/tag/Tag.svelte";
 
 
-// Bookmark props
-let bookmark = {
-	id: '1',
-	title: 'yeee',
-	url: "",
-	description: "",
-	image: "",
-	archived: false,
-	deleted: false
-};
-
-let b = [bookmark]
 
 </script>
 

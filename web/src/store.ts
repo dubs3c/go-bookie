@@ -15,12 +15,12 @@ const Bookmarks = () => {
     // method to archive a task, think of a action with redux or Vuex
     archiveTask: id =>
       update(bookmarks =>
-        bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, archived: true } : bookmark))
+        bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, archived: !bookmark.archived } : bookmark))
       ),
     // method to archive a bookmark, think of a action with redux or Vuex
-    pinTask: id =>
+    deleteBookmark: id =>
       update(bookmarks =>
-        bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, deleted: false } : bookmark))
+        bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, deleted: !bookmark.deleted } : bookmark))
       ),
   };
 };

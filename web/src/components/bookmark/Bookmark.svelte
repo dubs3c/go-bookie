@@ -6,17 +6,17 @@
     const dispatch = createEventDispatcher();
 
     // event handler for Pin Task
-    function PinTask() {
-    dispatch('onPinTask', {
-        id: task.id,
+    function DeleteBookmark(BookmarkID) {
+    dispatch('onDeleteBookmark', {
+        id: BookmarkID,
     });
     }
 
     // event handler for Archive Task
-    function ArchiveTask() {
-    dispatch('onArchiveTask', {
-        id: task.id,
-    });
+    function ArchiveBookmark(BookmarkID) {
+        dispatch('ArchiveTask', {
+            id: BookmarkID,
+        });
     }
 
     // Bookmark props
@@ -40,12 +40,14 @@
         <a href="\#" class="view">
             <i class="fas fa-eye"></i> View
         </a>
-        <a href="\#" class="delete {bookmark.deleted == true ? "red": ""}">
+        <button on:click={DeleteBookmark(bookmark.id)}  class="delete {bookmark.deleted == true ? "red": ""}">
             <i class="fas fa-trash-alt"></i> {bookmark.deleted == true ? "Deleted": "Delete"}
-        </a>
-        <a href="\#" class="archive {bookmark.archived == true ? "green": ""}">
+        </button>
+
+        <button on:click={ArchiveBookmark(bookmark.id)} class="archive {bookmark.archived == true ? "green": ""}">
             <i class="fas fa-bookmark"></i> {bookmark.archived == true ? "Archived": "Archive"}
-        </a>
+        </button>
+
     </div>
 </div>
 <div class="border"></div>
