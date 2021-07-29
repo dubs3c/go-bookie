@@ -4,8 +4,19 @@ import Button from "./components/button/Button.svelte";
 import Card from "./components/card/Card.svelte";
 import Input from "./components/input/Input.svelte";
 import Tag from "./components/tag/Tag.svelte";
+import { CreateBookmark } from "./actions/BookmarkAction.svelte";
 
 
+let url = "";
+let promise = Promise.resolve([]);
+
+function handleBookmarkInput(event) {
+	url = event.detail.text
+}
+
+function handleClick() {
+    promise = CreateBookmark()
+}
 
 </script>
 
@@ -18,8 +29,6 @@ import Tag from "./components/tag/Tag.svelte";
 	</div>
 
 	<Card>
-
-
 		<div class="row">
 			<div class="col">
 				<h4>Filter</h4>
@@ -30,7 +39,15 @@ import Tag from "./components/tag/Tag.svelte";
 			</div>
 			<div class="col lol">
 				<h4>Save a link!</h4>
-				<Input placeholder="Enter URL or some text"/>
+				<Input on:inputText={ handleBookmarkInput } placeholder="Enter URL or some text"/>
+				<Button on:buttonClick={ handleClick } value="Save bookmark!"/>
+				{#await promise}
+					<p><i>Adding bookmark...</i></p>
+				{:catch error}
+					<p style="color: red">Could not create bookmark 😭 <strong>Error: {error.message}</strong></p>
+				{/await}
+
+				
 			</div>
 		</div>
 
@@ -47,11 +64,9 @@ import Tag from "./components/tag/Tag.svelte";
 
 		<Button value="Filter on tag"/>
 
-
 	</Card>
 	
 	<br />
-	
 	<div class="row">
 		<div class="col">
 			<BookmarkScreen/>
@@ -61,7 +76,6 @@ import Tag from "./components/tag/Tag.svelte";
 </main>
 
 <style>
-
 	.filter-list li {
 		list-style: none;
 	}
@@ -69,5 +83,4 @@ import Tag from "./components/tag/Tag.svelte";
 	.lol {
 		width: 80%;
 	}
-
 </style>
