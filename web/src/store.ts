@@ -3,7 +3,7 @@ import { writable } from 'svelte/store';
 
 const Bookmarks = () => {
   // creates a new writable store populated with some initial data
-  const { subscribe, update } = writable([
+  const { subscribe, update, set } = writable([
     { id: '1', title: 'Something', url: 'http://google.com', image: "image", description: "desc", archived: false , deleted: false },
     { id: '2', title: 'Something more', url: 'http://ms.com', image: "image", description: "desc", archived: false , deleted: false },
     { id: '3', title: 'Something else', url: 'http://dn.com', image: "image", description: "desc", archived: false , deleted: false },
@@ -12,8 +12,10 @@ const Bookmarks = () => {
 
   return {
     subscribe,
+    update,
+    set,
     // method to archive a task, think of a action with redux or Vuex
-    archiveTask: id =>
+    archiveBookmark: id =>
       update(bookmarks =>
         bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, archived: !bookmark.archived } : bookmark))
       ),

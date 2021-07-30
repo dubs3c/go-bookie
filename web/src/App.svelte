@@ -4,8 +4,9 @@ import Button from "./components/button/Button.svelte";
 import Card from "./components/card/Card.svelte";
 import Input from "./components/input/Input.svelte";
 import Tag from "./components/tag/Tag.svelte";
-import { CreateBookmark } from "./actions/BookmarkAction.svelte";
-
+import { CreateBookmark, GetBookmarks } from "./actions/BookmarkAction.svelte";
+import { onMount } from "svelte";
+import { bookmarkStore } from "./store";
 
 let url = "";
 let promise = Promise.resolve([]);
@@ -15,8 +16,14 @@ function handleBookmarkInput(event) {
 }
 
 function handleClick() {
-    promise = CreateBookmark()
+    promise = CreateBookmark(url)
+	// run GetBookmarks() ?
 }
+
+onMount(async () => {
+	let res = await GetBookmarks()
+	$bookmarkStore = [...res]
+})
 
 </script>
 
@@ -72,7 +79,7 @@ function handleClick() {
 			<BookmarkScreen/>
 		</div>
 	</div>
-
+	<br />
 </main>
 
 <style>
