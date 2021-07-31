@@ -7,22 +7,40 @@ import Tag from "./components/tag/Tag.svelte";
 import { CreateBookmark, GetBookmarks } from "./actions/BookmarkAction.svelte";
 import { onMount } from "svelte";
 import { bookmarkStore } from "./store";
+import type { Pagination } from "./types/Pagination";
 
-let url = "";
+let url: string = "";
 let promise = Promise.resolve([]);
+
+let currentPage: number = 0
+let totalPages: number = 0
+let pageSize: number = 0
 
 function handleBookmarkInput(event) {
 	url = event.detail.text
 }
 
 function handleClick() {
-    promise = CreateBookmark(url)
-	// run GetBookmarks() ?
+	if(url != "") {
+		promise = CreateBookmark(url)
+		// run GetBookmarks() ?
+	}
+}
+
+async function changePage(pageNumber: number) {
+	currentPage = pageNumber
+	let paginatedObject: Pagination = await GetBookmarks(currentPage)
+	totalPages = paginatedObject.totalPages
+	pageSize = paginatedObject.limit
+	$bookmarkStore = paginatedObject.data
 }
 
 onMount(async () => {
-	let res = await GetBookmarks()
-	$bookmarkStore = [...res]
+	let paginatedObject: Pagination = await GetBookmarks(currentPage)
+	currentPage = paginatedObject.page
+	totalPages = paginatedObject.totalPages
+	pageSize = paginatedObject.limit
+	$bookmarkStore = paginatedObject.data
 })
 
 </script>
@@ -78,6 +96,16 @@ onMount(async () => {
 		<div class="col">
 			<BookmarkScreen/>
 		</div>
+	</div>
+	<div class="row">
+		<p>
+			{#if currentPage > 1 }
+				<button on:click={() => changePage(1)}>« first</button> <button on:click={() => changePage(currentPage-1)}>previous</button>
+			{/if}
+			Page {currentPage} of {totalPages}
+			<button on:click={() => changePage(currentPage+1)}>next</button>
+			<button on:click={() => changePage(totalPages)}>last »</button>
+		</p>
 	</div>
 	<br />
 </main>

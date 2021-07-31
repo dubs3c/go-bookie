@@ -15,8 +15,11 @@ export async function CreateBookmark(url: string) {
 	}
 }
 
-export async function GetBookmarks() {
-	const response = await fetch(baseURL + "/api/v1/bookmarks", {
+export async function GetBookmarks(page: number) {
+	if(page == 0) {
+		page = 1
+	}
+	const response = await fetch(baseURL + "/api/v1/bookmarkss?page=" + page, {
 		method: 'GET'
 	})
 
