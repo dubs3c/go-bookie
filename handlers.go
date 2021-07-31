@@ -10,7 +10,7 @@ import (
 	"time"
 
 	goose "github.com/advancedlogic/GoOse"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v4/pgxpool"
 	jsoniter "github.com/json-iterator/go"
 )
