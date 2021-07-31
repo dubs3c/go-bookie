@@ -19,7 +19,7 @@ export async function GetBookmarks(page: number) {
 	if(page == 0) {
 		page = 1
 	}
-	const response = await fetch(baseURL + "/api/v1/bookmarkss?page=" + page, {
+	const response = await fetch(baseURL + "/api/v1/bookmarks?page=" + page, {
 		method: 'GET'
 	})
 

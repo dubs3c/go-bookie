@@ -2,7 +2,6 @@ package gobookie
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/jackc/pgx/v4"
@@ -15,28 +14,58 @@ func (s *Server) BookmarkRepositoryInsert(bookmark *CreateBookmarkRequest) (int,
 	return last, err
 }
 
+// BookmarkRepositoryCount Get total amount of bookmarks
+func (s *Server) BookmarkRepositoryCount() (int, error) {
+	var count int
+	rows, err := s.DB.Query(context.Background(), "SELECT count(*) as count FROM bookmarks")
+
+	if err != nil {
+		return 0, err
+	}
+
+	for rows.Next() {
+		err := rows.Scan(&count)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return count, nil
+}
+
 // BookmarkRepositoryGetAllBookmarks - Get all bookmarks from database
-func (s *Server) BookmarkRepositoryGetAllBookmarks() ([]*Bookmark, error) {
-	var bm []*Bookmark
-	rows, err := s.DB.Query(context.Background(), "select id, title, description, body, image, url, archived, deleted from bookmarks")
-	defer rows.Close()
+func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int) ([]*BookmarkList, error) {
+	var bm []*BookmarkList
+	var offset int
+
+	if page <= 1 {
+		offset = 0
+	} else {
+		offset = limit*page - limit
+	}
+
+	rows, err := s.DB.Query(context.Background(),
+		"select id, title, description, image, url, archived, deleted from bookmarks order by id LIMIT $1 OFFSET $2", limit, offset)
 
 	if err != nil {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
-		n := new(Bookmark)
-		err = rows.Scan(&n.ID, &n.Title, &n.Description, &n.Body, &n.Image, &n.URL, &n.Archived, &n.Deleted)
+		n := new(BookmarkList)
+		err = rows.Scan(&n.ID, &n.Title, &n.Description, &n.Image, &n.URL, &n.Archived, &n.Deleted)
 		if err != nil {
-			fmt.Println(err)
+			log.Println("Error scanning bookmarkList:", err)
 		}
 		bm = append(bm, n)
 	}
+
 	return bm, nil
 }
 
-// BookmarkRepositoryGetBookmarkByID - Get a specifc bookmark by its database id
+// BookmarkRepositoryGetBook.markByID - Get a specifc bookmark by its database id
 func (s *Server) BookmarkRepositoryGetBookmarkByID(bookmarkID string) (Bookmark, error) {
 	var bookmark Bookmark
 

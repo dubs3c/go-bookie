@@ -12,6 +12,24 @@ type Bookmark struct {
 	Deleted     bool   `json:"deleted"`
 }
 
+// Bookmark list model
+type BookmarkList struct {
+	ID          uint   `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Image       string `json:"image"`
+	URL         string `json:"url"`
+	Archived    bool   `json:"archived"`
+	Deleted     bool   `json:"deleted"`
+}
+
+type PaginatedBookmarks struct {
+	Page       int             `json:"page"`
+	TotalPages int             `json:"totalPages"`
+	Limit      int             `json:"limit"`
+	Data       []*BookmarkList `json:"data"`
+}
+
 // CreateBookmarkRequest - Used for creating a bookmark
 type CreateBookmarkRequest struct {
 	URL string `json:"url"`

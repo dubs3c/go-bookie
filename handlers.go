@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"strconv"
 	"time"
 
 	goose "github.com/advancedlogic/GoOse"
@@ -75,15 +76,53 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 
 // ListBookmarks Return all bookmarks
 func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
+	var pageNumber int
+	var bookmarkLimit int
+	var total int
+	var err error
 
-	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks()
+	if page := r.URL.Query().Get("page"); page == "" {
+		pageNumber = 1
+	} else {
+		if pageNumber, err = strconv.Atoi(page); err != nil {
+			RespondWithError(w, 400, "page should be integer")
+			return
+		}
+	}
+
+	if limit := r.URL.Query().Get("limit"); limit == "" {
+		bookmarkLimit = 10
+	} else {
+		if bookmarkLimit, err = strconv.Atoi(limit); err != nil {
+			RespondWithError(w, 400, "limit should be integer")
+			return
+		}
+	}
+
+	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks(pageNumber, bookmarkLimit)
 
 	if err != nil {
 		RespondWithError(w, 500, "Something went wrong while fetching bookmarks")
+		log.Println(err)
 		return
 	}
 
-	RespondWithJSON(w, 200, bookmarks)
+	bookmarksAmount, _ := s.BookmarkRepositoryCount()
+
+	if bookmarksAmount > bookmarkLimit {
+		total = (bookmarksAmount + bookmarkLimit - 1) / bookmarkLimit
+	} else {
+		total = (bookmarkLimit + bookmarksAmount - 1) / bookmarksAmount
+	}
+
+	paginatedResult := PaginatedBookmarks{
+		Page:       pageNumber,
+		TotalPages: total,
+		Limit:      bookmarkLimit,
+		Data:       bookmarks,
+	}
+
+	RespondWithJSON(w, 200, paginatedResult)
 }
 
 // GetBookmark Get a specific bookmark by its ID

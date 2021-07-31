@@ -6,8 +6,7 @@ import (
 
 func TestPatch(t *testing.T) {
 
-	var trueValue bool
-	trueValue = true
+	trueValue := true
 
 	test1 := UpdateBookmarkRequest{
 		URL:     "www.coolurl.com",
@@ -20,7 +19,6 @@ func TestPatch(t *testing.T) {
 		Title:       "Cool website title",
 		Description: "A description",
 		URL:         "www.booringurl.com",
-		Body:        "body",
 		Image:       "image",
 		Archived:    false,
 		Deleted:     false,
