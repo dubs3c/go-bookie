@@ -155,8 +155,25 @@ func (s *Server) DeleteBookmark(w http.ResponseWriter, r *http.Request) {
 		RespondWithError(w, 500, "Could not delete bookmark")
 		return
 	}
-
 	RespondWithJSON(w, 200, bookmark)
+}
+
+// DeleteBookmark Delete a specific bookmark by its ID
+func (s *Server) MoveBookmarkToTrash(w http.ResponseWriter, r *http.Request) {
+	bookmarkID := chi.URLParam(r, "bookmarkID")
+
+	bookmark, err := s.BookmarkRepositoryTrashBookmarkByID(bookmarkID)
+
+	if err != nil {
+		RespondWithError(w, 500, "Could not mark bookmark as deleted")
+		return
+	}
+	RespondWithJSON(w, 200, bookmark)
+}
+
+// DeleteBookmark Delete a specific bookmark by its ID
+func (s *Server) CorsOptions(w http.ResponseWriter, r *http.Request) {
+	RespondWithJSON(w, 200, "")
 }
 
 // UpdateBookmark Update a bookmark by its ID

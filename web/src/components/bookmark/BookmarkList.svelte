@@ -7,7 +7,7 @@
     bookmarkStore.deleteBookmark(event.detail.id);
   }
   function onArchiveTask(event) {
-    bookmarkStore.archiveTask(event.detail.id);
+    bookmarkStore.archiveBookmark(event.detail.id);
   }
 </script>
 

@@ -30,4 +30,32 @@ export async function GetBookmarks(page: number) {
 	}
 }
 
+export async function DeleteBookmark(id: number) {
+	await fetch(baseURL + "/api/v1/bookmarks/"+id, {
+		method: "DELETE"
+	}).then(response => {
+		if(response.ok) {
+			return response.json();
+		}
+	}).catch(error => {
+		console.log(error)
+		return error
+	})
+}
+
+export async function ArchiveBookmark(id: number) {
+	let archived = true
+	await fetch(baseURL + "/api/v1/bookmarks/"+id, {
+		method: "PATCH",
+		body: JSON.stringify({archived})
+	}).then(response => {
+		if(response.ok) {
+			return response.json();
+		}
+	}).catch(error => {
+		console.log(error)
+		return error
+	})
+}
+
 </script>

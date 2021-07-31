@@ -45,7 +45,7 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int) ([]*Book
 	}
 
 	rows, err := s.DB.Query(context.Background(),
-		"select id, title, description, image, url, archived, deleted from bookmarks order by id LIMIT $1 OFFSET $2", limit, offset)
+		"select id, title, description, image, url, archived, deleted from bookmarks order by created_at desc LIMIT $1 OFFSET $2", limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -84,6 +84,24 @@ func (s *Server) BookmarkRepositoryGetBookmarkByID(bookmarkID string) (Bookmark,
 // BookmarkRepositoryDeleteBookmarkByID - Delete a specifc bookmark by its database id
 func (s *Server) BookmarkRepositoryDeleteBookmarkByID(bookmarkID string) (int64, error) {
 	rows, err := s.DB.Query(context.Background(), "DElETE FROM bookmarks WHERE id=$1", bookmarkID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	defer rows.Close()
+
+	return rows.CommandTag().RowsAffected(), err
+}
+
+// BookmarkRepositoryTrashBookmarkByID - Mark bookmark as deleted
+func (s *Server) BookmarkRepositoryTrashBookmarkByID(bookmarkID string) (int64, error) {
+	rows, err := s.DB.Query(context.Background(), "UPDATE bookmarks SET deleted=true WHERE id=$1", bookmarkID)
+
+	if err != nil {
+		return 0, err
+	}
+
 	defer rows.Close()
 
 	return rows.CommandTag().RowsAffected(), err
