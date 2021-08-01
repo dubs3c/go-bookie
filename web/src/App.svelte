@@ -4,7 +4,7 @@ import Button from "./components/button/Button.svelte";
 import Card from "./components/card/Card.svelte";
 import Input from "./components/input/Input.svelte";
 import Tag from "./components/tag/Tag.svelte";
-import { CreateBookmark, GetBookmarks } from "./actions/BookmarkAction.svelte";
+import { DeleteBookmark, ArchiveBookmark, CreateBookmark, GetBookmarks } from "./actions/BookmarkAction.svelte";
 import { onMount } from "svelte";
 import { bookmarkStore } from "./store";
 import type { Pagination } from "./types/Pagination";
@@ -43,14 +43,21 @@ onMount(async () => {
 	$bookmarkStore = paginatedObject.data
 })
 
-
-function onDeleteBookmark(event) {
-  bookmarkStore.deleteBookmark(event.detail.id);
+async function onDeleteBookmark(event) {
+	bookmarkStore.deleteBookmark(event.detail.id);
+	await DeleteBookmark(event.detail.id)
+	const aa: Pagination = await GetBookmarks(currentPage)
+	$bookmarkStore = aa.data
 }
 
-function onArchiveTask(event) {
+async function onArchiveTask(event) {
 	bookmarkStore.archiveBookmark(event.detail.id);
+	await ArchiveBookmark(event.detail.id)
+	const aa: Pagination = await GetBookmarks(currentPage)
+	$bookmarkStore = aa.data
 }
+
+
 
 </script>
 
@@ -116,8 +123,10 @@ function onArchiveTask(event) {
 				<button on:click={() => changePage(1)}>« first</button> <button on:click={() => changePage(currentPage-1)}>previous</button>
 			{/if}
 			Page {currentPage} of {totalPages}
-			<button on:click={() => changePage(currentPage+1)}>next</button>
-			<button on:click={() => changePage(totalPages)}>last »</button>
+			{#if totalPages > 1 }
+				<button on:click={() => changePage(currentPage+1)}>next</button>
+				<button on:click={() => changePage(totalPages)}>last »</button>
+			{/if}
 		</p>
 	</div>
 	<br />

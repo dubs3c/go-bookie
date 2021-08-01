@@ -34,7 +34,7 @@ func (s *Server) BookmarkRepositoryCount() (int, error) {
 }
 
 // BookmarkRepositoryGetAllBookmarks - Get all bookmarks from database
-func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int) ([]*BookmarkList, error) {
+func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int, archived bool, deleted bool) ([]*BookmarkList, error) {
 	var bm []*BookmarkList
 	var offset int
 
@@ -45,7 +45,7 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int) ([]*Book
 	}
 
 	rows, err := s.DB.Query(context.Background(),
-		"select id, title, description, image, url, archived, deleted from bookmarks where deleted=false and archived=false order by created_at desc LIMIT $1 OFFSET $2", limit, offset)
+		"select id, title, description, image, url, archived, deleted from bookmarks where deleted=$4 and archived=$3 order by created_at desc LIMIT $1 OFFSET $2", limit, offset, archived, deleted)
 
 	if err != nil {
 		return nil, err

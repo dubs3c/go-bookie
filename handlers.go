@@ -76,30 +76,32 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 
 // ListBookmarks Return all bookmarks
 func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
-	var pageNumber int
-	var bookmarkLimit int
-	var total int
-	var err error
+	var (
+		pageNumber    int
+		bookmarkLimit int
+		total         int
+		archived      bool
+		deleted       bool
+		err           error
+	)
 
-	if page := r.URL.Query().Get("page"); page == "" {
+	if pageNumber, err = strconv.Atoi(r.URL.Query().Get("page")); err != nil {
 		pageNumber = 1
-	} else {
-		if pageNumber, err = strconv.Atoi(page); err != nil {
-			RespondWithError(w, 400, "page should be integer")
-			return
-		}
 	}
 
-	if limit := r.URL.Query().Get("limit"); limit == "" {
+	if bookmarkLimit, err = strconv.Atoi(r.URL.Query().Get("limit")); err != nil {
 		bookmarkLimit = 10
-	} else {
-		if bookmarkLimit, err = strconv.Atoi(limit); err != nil {
-			RespondWithError(w, 400, "limit should be integer")
-			return
-		}
 	}
 
-	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks(pageNumber, bookmarkLimit)
+	if archived, err = strconv.ParseBool(r.URL.Query().Get("archived")); err != nil {
+		archived = false
+	}
+
+	if deleted, err = strconv.ParseBool(r.URL.Query().Get("deleted")); err != nil {
+		deleted = false
+	}
+
+	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks(pageNumber, bookmarkLimit, archived, deleted)
 
 	if err != nil {
 		RespondWithError(w, 500, "Something went wrong while fetching bookmarks")
@@ -107,12 +109,12 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmarksAmount, _ := s.BookmarkRepositoryCount()
-
-	if bookmarksAmount > bookmarkLimit {
-		total = (bookmarksAmount + bookmarkLimit - 1) / bookmarkLimit
+	if len(bookmarks) < bookmarkLimit {
+		total = 1
 	} else {
-		total = (bookmarkLimit + bookmarksAmount - 1) / bookmarksAmount
+		bookmarksAmount, _ := s.BookmarkRepositoryCount()
+		log.Println(bookmarksAmount)
+		total = (bookmarksAmount + bookmarkLimit - 1) / bookmarkLimit
 	}
 
 	paginatedResult := PaginatedBookmarks{
