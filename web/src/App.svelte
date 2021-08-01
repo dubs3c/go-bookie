@@ -1,5 +1,5 @@
 <script lang="ts">
-import BookmarkScreen from "./components/bookmark/BookmarkScreen.svelte";
+import PureBookmarkList from "./components/bookmark/PureBookmarkList.svelte";
 import Button from "./components/button/Button.svelte";
 import Card from "./components/card/Card.svelte";
 import Input from "./components/input/Input.svelte";
@@ -42,6 +42,15 @@ onMount(async () => {
 	pageSize = paginatedObject.limit
 	$bookmarkStore = paginatedObject.data
 })
+
+
+function onDeleteBookmark(event) {
+  bookmarkStore.deleteBookmark(event.detail.id);
+}
+
+function onArchiveTask(event) {
+	bookmarkStore.archiveBookmark(event.detail.id);
+}
 
 </script>
 
@@ -94,7 +103,11 @@ onMount(async () => {
 	<br />
 	<div class="row">
 		<div class="col">
-			<BookmarkScreen/>
+			<PureBookmarkList
+			bookmarks={$bookmarkStore}
+			on:onDeleteBookmark={onDeleteBookmark}
+			on:ArchiveTask={onArchiveTask}
+		  />
 		</div>
 	</div>
 	<div class="row">

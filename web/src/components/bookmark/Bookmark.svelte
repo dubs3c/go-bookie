@@ -1,8 +1,10 @@
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<script>
+<script lang="ts">
+
 import "./bookmark.css"
 import { createEventDispatcher } from 'svelte';
 import { DeleteBookmark, ArchiveBookmark } from "./../../actions/BookmarkAction.svelte"
+import type {Bookmark} from "./../../types/Bookmark"
 
 const dispatch = createEventDispatcher();
 
@@ -23,15 +25,7 @@ function HandleArchiveBookmark(BookmarkID) {
 }
 
 // Bookmark props
-export let bookmark = {
-    id: '',
-    title: '',
-    url: "",
-    description: "",
-    image: "",
-    archived: false,
-    deleted: false
-};
+export let bookmark: Bookmark
 
 </script>
 
@@ -43,11 +37,11 @@ export let bookmark = {
         <a href="\#" class="view">
             <i class="fas fa-eye"></i> View
         </a>
-        <button on:click={HandleDeleteBookmark(bookmark.id)}  class="delete {bookmark.deleted == true ? "red": ""}">
+        <button on:click={() => HandleDeleteBookmark(bookmark.id)}  class="delete {bookmark.deleted == true ? "red": ""}">
             <i class="fas fa-trash-alt"></i> {bookmark.deleted == true ? "Deleted": "Delete"}
         </button>
 
-        <button on:click={HandleArchiveBookmark(bookmark.id)} class="archive {bookmark.archived == true ? "green": ""}">
+        <button on:click={() => HandleArchiveBookmark(bookmark.id)} class="archive {bookmark.archived == true ? "green": ""}">
             <i class="fas fa-bookmark"></i> {bookmark.archived == true ? "Archived": "Archive"}
         </button>
 

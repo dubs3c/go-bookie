@@ -45,7 +45,7 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int) ([]*Book
 	}
 
 	rows, err := s.DB.Query(context.Background(),
-		"select id, title, description, image, url, archived, deleted from bookmarks order by created_at desc LIMIT $1 OFFSET $2", limit, offset)
+		"select id, title, description, image, url, archived, deleted from bookmarks where deleted=false and archived=false order by created_at desc LIMIT $1 OFFSET $2", limit, offset)
 
 	if err != nil {
 		return nil, err
