@@ -30,6 +30,38 @@ export async function GetBookmarks(page: number) {
 	}
 }
 
+export async function GetFilteredBookmarks(page: number, deleted: boolean, archived: boolean) {
+	if(page == 0) {
+		page = 1
+	}
+
+	let filter: string = ""
+
+	if(archived) {
+		filter += "&archived=true"
+	}
+
+	if(deleted) {
+		filter += "&deleted=true"
+	}
+
+	let url: string = "/api/v1/bookmarks?page=" + page
+
+	if(filter != "") {
+		url += filter
+	}
+
+	const response = await fetch(baseURL + url, {
+		method: 'GET'
+	})
+
+	if (response.ok) {
+		return response.json();
+	} else {
+		throw new Error(response.statusText);
+	}
+}
+
 export async function DeleteBookmark(id: number) {
 	await fetch(baseURL + "/api/v1/bookmarks/"+id, {
 		method: "DELETE"

@@ -38,6 +38,8 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int, archived
 	var bm []*BookmarkList
 	var offset int
 
+	bm = make([]*BookmarkList, 0)
+
 	if page <= 1 {
 		offset = 0
 	} else {

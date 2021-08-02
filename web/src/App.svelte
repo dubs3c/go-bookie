@@ -4,7 +4,7 @@ import Button from "./components/button/Button.svelte";
 import Card from "./components/card/Card.svelte";
 import Input from "./components/input/Input.svelte";
 import Tag from "./components/tag/Tag.svelte";
-import { DeleteBookmark, ArchiveBookmark, CreateBookmark, GetBookmarks } from "./actions/BookmarkAction.svelte";
+import { DeleteBookmark, ArchiveBookmark, CreateBookmark, GetBookmarks, GetFilteredBookmarks } from "./actions/BookmarkAction.svelte";
 import { onMount } from "svelte";
 import { bookmarkStore } from "./store";
 import type { Pagination } from "./types/Pagination";
@@ -16,6 +16,9 @@ let currentPage: number = 0
 let totalPages: number = 0
 let pageSize: number = 0
 
+let archiveCheckbox: boolean = false
+let deletedCheckbox: boolean = false
+
 function handleBookmarkInput(event) {
 	url = event.detail.text
 }
@@ -25,6 +28,22 @@ function handleClick() {
 		promise = CreateBookmark(url)
 		// run GetBookmarks() ?
 	}
+}
+
+async function filterBookmarks() {
+	let paginatedObject: Pagination 
+	
+	if(deletedCheckbox == false && archiveCheckbox == false) {
+		paginatedObject= await GetBookmarks(currentPage)
+	} else {
+		paginatedObject = await GetFilteredBookmarks(currentPage, deletedCheckbox, archiveCheckbox)
+	}
+
+	currentPage = paginatedObject.page
+	totalPages = paginatedObject.totalPages
+	pageSize = paginatedObject.limit
+
+	$bookmarkStore = paginatedObject.data
 }
 
 async function changePage(pageNumber: number) {
@@ -57,8 +76,6 @@ async function onArchiveTask(event) {
 	$bookmarkStore = aa.data
 }
 
-
-
 </script>
 
 <main>
@@ -68,55 +85,59 @@ async function onArchiveTask(event) {
 			<hr />
 		</div>
 	</div>
-
-	<Card>
-		<div class="row">
-			<div class="col">
-				<h4>Filter</h4>
-				<ul class="filter-list">
-					<li><a href="?filter=unread"><i class="fas fa-angle-right"></i> Unread</a></li>
-					<li><a href="?filter=read"><i class="fas fa-angle-right"></i> Read</a></li>
-				</ul>
-			</div>
-			<div class="col lol">
-				<h4>Save a link!</h4>
-				<Input on:inputText={ handleBookmarkInput } placeholder="Enter URL or some text"/>
-				<Button on:buttonClick={ handleClick } value="Save bookmark!"/>
-				{#await promise}
-					<p><i>Adding bookmark...</i></p>
-				{:catch error}
-					<p style="color: red">Could not create bookmark 😭 <strong>Error: {error.message}</strong></p>
-				{/await}
-
-				
-			</div>
-		</div>
-
-		<div class="row">
-			<div class="col">
-				<h4>Tags</h4>
-				<Tag value="APT"/>
-				<Tag value="Spring Boot"/>
-				<Tag value="Golang"/>
-			</div>
-		</div>
-
-		<br />
-
-		<Button value="Filter on tag"/>
-
-	</Card>
-	
-	<br />
 	<div class="row">
 		<div class="col">
+			<Card>
+				<div class="row">
+					<div class="col">
+						<h4>Save a link!</h4>
+						<Input on:inputText={ handleBookmarkInput } placeholder="Enter URL or some text"/>
+						<Button on:buttonClick={ handleClick } value="Save bookmark!"/>
+						{#await promise}
+							<p><i>Adding bookmark...</i></p>
+						{:catch error}
+							<p style="color: red">Could not create bookmark 😭 <strong>Error: {error.message}</strong></p>
+						{/await}
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col">
+						<h4>Filter</h4>
+							<label><input type="checkbox" bind:checked={archiveCheckbox} on:change="{filterBookmarks}" /> Archived</label><br />
+							<label><input type="checkbox" bind:checked={deletedCheckbox} on:change="{filterBookmarks}"/> Deleted</label>
+					</div>
+				</div>
+		
+				<div class="row">
+					<div class="col">
+						<h4>Tags</h4>
+						<Tag value="APT"/>
+						<Tag value="Spring Boot"/>
+						<Tag value="Golang"/>
+					</div>
+				</div>
+		
+				<br />
+		
+				<Button value="Filter on tag"/>
+		
+			</Card>
+		</div>
+		<div class="col">
+
 			<PureBookmarkList
 			bookmarks={$bookmarkStore}
 			on:onDeleteBookmark={onDeleteBookmark}
 			on:ArchiveTask={onArchiveTask}
-		  />
+			/>
+
 		</div>
 	</div>
+	
+	
+	<br />
+
 	<div class="row">
 		<p>
 			{#if currentPage > 1 }
@@ -131,13 +152,3 @@ async function onArchiveTask(event) {
 	</div>
 	<br />
 </main>
-
-<style>
-	.filter-list li {
-		list-style: none;
-	}
-
-	.lol {
-		width: 80%;
-	}
-</style>

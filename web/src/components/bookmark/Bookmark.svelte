@@ -2,7 +2,7 @@
 <script lang="ts">
 import "./bookmark.css"
 import { createEventDispatcher } from 'svelte';
-import { DeleteBookmark, ArchiveBookmark } from "./../../actions/BookmarkAction.svelte"
+import { DeleteBookmark } from "./../../actions/BookmarkAction.svelte"
 import type {Bookmark} from "./../../types/Bookmark"
 
 const dispatch = createEventDispatcher();

@@ -15,7 +15,6 @@
 	  }
 
     // reactive declarations (computed prop in other frameworks)
-    $: noBookmarks = bookmarks.length === 0;
     $: emptyBookmarks = bookmarks.length === 0 && !loading;
   </script>
   {#if loading}
