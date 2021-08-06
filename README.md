@@ -1,4 +1,4 @@
-<h1 align="center">Go-Bookie</h1>
+<h1 align="center">SAMLA</h1>
 <p align="center">
 <a href="https://goreportcard.com/badge/github.com/dubs3c/go-bookie"><img src="https://goreportcard.com/badge/github.com/dubs3c/go-bookie"></a>
 <a href="https://img.shields.io/github/workflow/status/dubs3c/go-bookie/Go"><img src="https://img.shields.io/github/workflow/status/dubs3c/go-bookie/Go"></a>
