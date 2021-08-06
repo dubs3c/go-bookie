@@ -26,6 +26,9 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 // RespondWithStatusCode - Respond with a status code without setting a message
 func RespondWithStatusCode(w http.ResponseWriter, code int) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PATCH, OPTIONS, HEAD")
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
 	w.WriteHeader(code)
 	return
 }

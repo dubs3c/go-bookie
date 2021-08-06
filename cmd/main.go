@@ -53,7 +53,7 @@ func main() {
 				r.Get("/", s.GetBookmark)
 				r.Put("/", s.UpdateBookmark)
 				r.Patch("/", s.UpdateBookmark)
-				r.Delete("/", s.MoveBookmarkToTrash)
+				r.Delete("/", s.DeleteBookmark)
 				r.Options("/", s.CorsOptions)
 			})
 		})

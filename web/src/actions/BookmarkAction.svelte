@@ -83,6 +83,20 @@ export async function DeleteBookmark(id: number) {
 	})
 }
 
+export async function ToggleStatus(id: number, deleted: boolean, archived: boolean) {
+	await fetch(baseURL + "/v1/bookmarks/"+id, {
+		method: "PATCH",
+		body: JSON.stringify({deleted, archived})
+	}).then(response => {
+		if(response.ok) {
+			return response.json();
+		}
+	}).catch(error => {
+		console.log(error)
+		return error
+	});
+}
+
 export async function ArchiveBookmark(id: number) {
 	let archived = true
 	await fetch(baseURL + "/v1/bookmarks/"+id, {

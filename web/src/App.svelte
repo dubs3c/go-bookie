@@ -65,17 +65,11 @@ onMount(async () => {
 })
 
 async function onDeleteBookmark(event) {
-	bookmarkStore.deleteBookmark(event.detail.id);
-	await DeleteBookmark(event.detail.id)
-	const aa: Pagination = await GetBookmarks(currentPage)
-	$bookmarkStore = aa.data
+	filterBookmarks()
 }
 
 async function onArchiveTask(event) {
-	bookmarkStore.archiveBookmark(event.detail.id);
-	await ArchiveBookmark(event.detail.id)
-	const aa: Pagination = await GetBookmarks(currentPage)
-	$bookmarkStore = aa.data
+	filterBookmarks()
 }
 
 function onActiveTag(event) {
@@ -93,7 +87,7 @@ function onActiveTag(event) {
 <main>
 	<div class="row">
 		<div class="col">
-			<h1><a href="/" style="text-decoration:none; color:turquoise;">Go-Bookie!</a></h1>
+			<h1><a href="/" style="text-decoration:none; color:turquoise;">SAMLA</a></h1>
 			<hr />
 		</div>
 	</div>

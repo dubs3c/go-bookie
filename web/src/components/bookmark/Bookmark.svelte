@@ -2,23 +2,23 @@
 <script lang="ts">
 import "./bookmark.css"
 import { createEventDispatcher } from 'svelte';
-import { DeleteBookmark } from "./../../actions/BookmarkAction.svelte"
+import { DeleteBookmark, ToggleStatus } from "./../../actions/BookmarkAction.svelte"
 import type {Bookmark} from "./../../types/Bookmark"
 import Tag from "../tag/Tag.svelte";
 
 const dispatch = createEventDispatcher();
 
 // event handler for Pin Task
-function HandleDeleteBookmark(BookmarkID) {
-    DeleteBookmark(BookmarkID)
+async function HandleDeleteBookmark(BookmarkID) {
+    await DeleteBookmark(BookmarkID)
     dispatch('onDeleteBookmark', {
         id: BookmarkID,
     });
 }
 
-// event handler for Archive Task
-function HandleArchiveBookmark(BookmarkID) {
-    dispatch('ArchiveTask', {
+async function ChangeStatus(BookmarkID: number, deleted: boolean, archived: boolean) {
+    await ToggleStatus(BookmarkID, deleted, archived)
+    dispatch('onDeleteBookmark', {
         id: BookmarkID,
     });
 }
@@ -36,13 +36,30 @@ export let bookmark: Bookmark
         <a href="\#" class="view">
             <i class="fas fa-eye"></i> View
         </a>
-        <button on:click={() => HandleDeleteBookmark(bookmark.id)}  class="delete {bookmark.deleted == true ? "red": ""}">
-            <i class="fas fa-trash-alt"></i> {bookmark.deleted == true ? "Removed": "Trash"}
-        </button>
+        {#if bookmark.deleted}
+            <button on:click={() => HandleDeleteBookmark(bookmark.id)}  class="delete {bookmark.deleted == true ? "red": ""}">
+                <i class="fas fa-trash-alt"></i> Delete
+            </button>
 
-        <button on:click={() => HandleArchiveBookmark(bookmark.id)} class="archive {bookmark.archived == true ? "green": ""}">
-            <i class="fas fa-bookmark"></i> {bookmark.archived == true ? "Archived": "Archive"}
-        </button>
+            <button on:click={() => ChangeStatus(bookmark.id, false, bookmark.archived)}  class="delete blue">
+                <i class="fas fa-trash-alt"></i> Restore
+            </button>
+        {:else}
+            <button on:click={() => ChangeStatus(bookmark.id, true, bookmark.archived)}  class="delete {bookmark.deleted == true ? "red": ""}">
+                <i class="fas fa-trash-alt"></i> Trash
+            </button>
+        {/if}
+
+
+        {#if bookmark.deleted != true }
+            <button on:click={() => ChangeStatus(bookmark.id, bookmark.deleted, !bookmark.archived)} class="archive {bookmark.archived == true ? "green": ""}">
+                {#if bookmark.archived}
+                    <i class="fas fa-bookmark"></i> Un-archive
+                {:else}
+                    <i class="fas fa-bookmark"></i> archive
+                {/if}
+            </button>
+        {/if}
 
         {#if bookmark.tags != ""}
         <br />

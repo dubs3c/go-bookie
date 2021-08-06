@@ -7,8 +7,8 @@ export interface Bookmark {
     body: string;
     description: string;
     image: string;
-    archived: Boolean;
-    deleted: Boolean;
+    archived: boolean;
+    deleted: boolean;
     tags: string
 };
 
@@ -19,7 +19,7 @@ export interface BookmarkList {
     url: string;
     description: string;
     image: string;
-    archived: Boolean;
-    deleted: Boolean;
+    archived: boolean;
+    deleted: boolean;
     tags: string
 };
