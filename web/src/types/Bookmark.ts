@@ -9,6 +9,7 @@ export interface Bookmark {
     image: string;
     archived: Boolean;
     deleted: Boolean;
+    tags: string
 };
 
 
@@ -20,4 +21,5 @@ export interface BookmarkList {
     image: string;
     archived: Boolean;
     deleted: Boolean;
+    tags: string
 };

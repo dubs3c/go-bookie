@@ -21,6 +21,7 @@ type BookmarkList struct {
 	URL         string `json:"url"`
 	Archived    bool   `json:"archived"`
 	Deleted     bool   `json:"deleted"`
+	Tags        string `json:"tags"`
 }
 
 type PaginatedBookmarks struct {
@@ -33,6 +34,15 @@ type PaginatedBookmarks struct {
 // CreateBookmarkRequest - Used for creating a bookmark
 type CreateBookmarkRequest struct {
 	URL string `json:"url"`
+}
+
+type CreateTagRequest struct {
+	BookmarkID int    `json:"bookmarkID"`
+	TagName    string `json:"tagName"`
+}
+
+type UpdateTagRequest struct {
+	TagName string `json:"tagName"`
 }
 
 // UpdateBookmarkRequest - PUT/PATCH object
@@ -49,4 +59,13 @@ type UpdateBookmarkRequest struct {
 // Bookmarks - A collection of bookmarks
 type Bookmarks struct {
 	Bookmarks []Bookmark
+}
+
+type Tag struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type Tags struct {
+	Tags []Tag
 }

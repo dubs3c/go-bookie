@@ -13,7 +13,7 @@
     cursor: pointer;
 }
 
-.tag:hover {
+.tag:hover, .highlight {
     background: #2a2c2d;
     color: #FFFFFF;
 }

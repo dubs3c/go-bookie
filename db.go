@@ -2,21 +2,24 @@ package gobookie
 
 import (
 	"context"
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 // DBInit - Connects to database
 func DBInit() (*pgxpool.Pool, error) {
-	dbpool, err := pgxpool.Connect(context.Background(), "host=127.0.0.1 port=5432 user=bookie dbname=bookie password=bookie sslmode=disable")
+	config, err := pgxpool.ParseConfig("host=127.0.0.1 port=5432 user=bookie dbname=bookie password=bookie sslmode=disable")
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+		log.Fatal("Error setting up DB: ", err)
 	}
 
-	//defer dbpool.Close()
+	dbpool, err := pgxpool.ConnectConfig(context.Background(), config)
+
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+
 	return dbpool, err
 }

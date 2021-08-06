@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestPatch(t *testing.T) {
+func TestPatchUtil(t *testing.T) {
 
 	trueValue := true
 

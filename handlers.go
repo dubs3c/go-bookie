@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	goose "github.com/advancedlogic/GoOse"
@@ -82,7 +83,9 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 		total         int
 		archived      bool
 		deleted       bool
+		tags          string
 		err           error
+		tagList       []string
 	)
 
 	if pageNumber, err = strconv.Atoi(r.URL.Query().Get("page")); err != nil {
@@ -101,7 +104,13 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 		deleted = false
 	}
 
-	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks(pageNumber, bookmarkLimit, archived, deleted)
+	if tags = r.URL.Query().Get("tags"); tags != "" {
+		tagList = strings.Split(tags, ",")
+	} else {
+		tagList = []string{}
+	}
+
+	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks(pageNumber, bookmarkLimit, archived, deleted, tagList)
 
 	if err != nil {
 		RespondWithError(w, 500, "Something went wrong while fetching bookmarks")
@@ -113,7 +122,6 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 		total = 1
 	} else {
 		bookmarksAmount, _ := s.BookmarkRepositoryCount()
-		log.Println(bookmarksAmount)
 		total = (bookmarksAmount + bookmarkLimit - 1) / bookmarkLimit
 	}
 
@@ -243,6 +251,44 @@ func (s *Server) UpdateBookmark(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondWithStatusCode(w, 200)
+}
+
+func (s *Server) ListTags(w http.ResponseWriter, r *http.Request) {
+	tags, err := s.TagsRepositoryGetTags()
+
+	if err != nil {
+		RespondWithError(w, 500, "Could not fetch tags")
+		return
+	}
+	RespondWithJSON(w, 200, tags.Tags)
+}
+
+func (s *Server) CreateTag(w http.ResponseWriter, r *http.Request) {
+	tagData := &CreateTagRequest{}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	if err := json.NewDecoder(r.Body).Decode(tagData); err != nil {
+		RespondWithError(w, 400, "Error decoding json. The bookmark id needs to be an interger and the tag name a string")
+	}
+
+	if tagData.TagName == "" {
+		RespondWithError(w, 400, "You need to specify a tag name")
+		return
+	}
+
+	if err := s.TagsRepositoryCreateTag(tagData.BookmarkID, tagData.TagName); err != nil {
+		RespondWithError(w, 500, "Could not create tag")
+		return
+	}
+
+	RespondWithStatusCode(w, 201)
+}
+
+func (s *Server) UpdateTag(w http.ResponseWriter, r *http.Request) {
+	// because we have a many-2-many relationship, a user should not be able to update a tag name
+	// if other users have the same tag. Instead, a new tag should be created with the updated name.
+	// Consider investigating if creating a SQL trigger/function could contain this logic.
+	// IF count(tag.id) > 1 THEN create_new_tag() ELSE update_tag()
 }
 
 // Error - A function that returns a custom error message

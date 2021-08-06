@@ -6,8 +6,10 @@ import Input from "./components/input/Input.svelte";
 import Tag from "./components/tag/Tag.svelte";
 import { DeleteBookmark, ArchiveBookmark, CreateBookmark, GetBookmarks, GetFilteredBookmarks } from "./actions/BookmarkAction.svelte";
 import { onMount } from "svelte";
-import { bookmarkStore } from "./store";
+import { bookmarkStore, tagStore } from "./store";
 import type { Pagination } from "./types/Pagination";
+import type { TagType } from "./types/Tag";
+import { GetTags } from "./actions/TagAction.svelte";
 
 let url: string = "";
 let promise = Promise.resolve([]);
@@ -18,6 +20,8 @@ let pageSize: number = 0
 
 let archiveCheckbox: boolean = false
 let deletedCheckbox: boolean = false
+
+let activeTags: Record<string, string> = {}
 
 function handleBookmarkInput(event) {
 	url = event.detail.text
@@ -33,11 +37,9 @@ function handleClick() {
 async function filterBookmarks() {
 	let paginatedObject: Pagination 
 	
-	if(deletedCheckbox == false && archiveCheckbox == false) {
-		paginatedObject= await GetBookmarks(currentPage)
-	} else {
-		paginatedObject = await GetFilteredBookmarks(currentPage, deletedCheckbox, archiveCheckbox)
-	}
+
+	paginatedObject = await GetFilteredBookmarks(currentPage, deletedCheckbox, archiveCheckbox, activeTags)
+	
 
 	currentPage = paginatedObject.page
 	totalPages = paginatedObject.totalPages
@@ -60,6 +62,9 @@ onMount(async () => {
 	totalPages = paginatedObject.totalPages
 	pageSize = paginatedObject.limit
 	$bookmarkStore = paginatedObject.data
+
+	let tags: TagType[] = await GetTags()
+	$tagStore = tags
 })
 
 async function onDeleteBookmark(event) {
@@ -74,6 +79,16 @@ async function onArchiveTask(event) {
 	await ArchiveBookmark(event.detail.id)
 	const aa: Pagination = await GetBookmarks(currentPage)
 	$bookmarkStore = aa.data
+}
+
+function onActiveTag(event) {
+	if(activeTags[event.detail.name] === "") {
+		delete activeTags[event.detail.name]
+	} else {
+		activeTags[event.detail.name] = ""
+	}
+
+	filterBookmarks()
 }
 
 </script>
@@ -112,9 +127,9 @@ async function onArchiveTask(event) {
 				<div class="row">
 					<div class="col">
 						<h4>Tags</h4>
-						<Tag value="APT"/>
-						<Tag value="Spring Boot"/>
-						<Tag value="Golang"/>
+						{#each $tagStore as tag}
+							<Tag on:onActiveTag={onActiveTag} value="{tag.name}"/>
+						{/each}
 					</div>
 				</div>
 		
@@ -131,6 +146,19 @@ async function onArchiveTask(event) {
 			on:onDeleteBookmark={onDeleteBookmark}
 			on:ArchiveTask={onArchiveTask}
 			/>
+			
+			<div class="row">
+				<p>
+					{#if currentPage > 1 }
+						<button on:click={() => changePage(1)}>« first</button> <button on:click={() => changePage(currentPage-1)}>previous</button>
+					{/if}
+					Page {currentPage} of {totalPages}
+					{#if totalPages > 1 }
+						<button on:click={() => changePage(currentPage+1)}>next</button>
+						<button on:click={() => changePage(totalPages)}>last »</button>
+					{/if}
+				</p>
+			</div>
 
 		</div>
 	</div>
@@ -138,17 +166,6 @@ async function onArchiveTask(event) {
 	
 	<br />
 
-	<div class="row">
-		<p>
-			{#if currentPage > 1 }
-				<button on:click={() => changePage(1)}>« first</button> <button on:click={() => changePage(currentPage-1)}>previous</button>
-			{/if}
-			Page {currentPage} of {totalPages}
-			{#if totalPages > 1 }
-				<button on:click={() => changePage(currentPage+1)}>next</button>
-				<button on:click={() => changePage(totalPages)}>last »</button>
-			{/if}
-		</p>
-	</div>
+	
 	<br />
 </main>

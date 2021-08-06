@@ -4,6 +4,7 @@ import "./bookmark.css"
 import { createEventDispatcher } from 'svelte';
 import { DeleteBookmark } from "./../../actions/BookmarkAction.svelte"
 import type {Bookmark} from "./../../types/Bookmark"
+import Tag from "../tag/Tag.svelte";
 
 const dispatch = createEventDispatcher();
 
@@ -42,6 +43,13 @@ export let bookmark: Bookmark
         <button on:click={() => HandleArchiveBookmark(bookmark.id)} class="archive {bookmark.archived == true ? "green": ""}">
             <i class="fas fa-bookmark"></i> {bookmark.archived == true ? "Archived": "Archive"}
         </button>
+
+        {#if bookmark.tags != ""}
+        <br />
+            {#each bookmark.tags.split(",") as tag}
+                <Tag value="{tag}"/>
+            {/each}
+        {/if}
 
     </div>
 </div>

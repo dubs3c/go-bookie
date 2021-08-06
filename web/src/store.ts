@@ -23,6 +23,8 @@ const Bookmarks = () => {
 };
 export const bookmarkStore = Bookmarks();
 
+export const tagStore = writable([])
+
 // store to handle the app state
 const appState = () => {
   const { subscribe, update } = writable(false);

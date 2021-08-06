@@ -45,8 +45,8 @@ func main() {
 		Router: r,
 	}
 
-	r.Route("/api", func(r chi.Router) {
-		r.Route("/v1/bookmarks", func(r chi.Router) {
+	r.Route("/v1", func(r chi.Router) {
+		r.Route("/bookmarks", func(r chi.Router) {
 			r.Get("/", s.ListBookmarks)
 			r.Post("/", s.CreateBookmark)
 			r.Route("/{bookmarkID}", func(r chi.Router) {
@@ -56,6 +56,11 @@ func main() {
 				r.Delete("/", s.MoveBookmarkToTrash)
 				r.Options("/", s.CorsOptions)
 			})
+		})
+		r.Route("/tags", func(r chi.Router) {
+			r.Get("/", s.ListTags)
+			r.Post("/", s.CreateTag)
+			r.Put("/", s.UpdateTag)
 		})
 	})
 
