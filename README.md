@@ -5,9 +5,11 @@
 </p>
 
 <p align="center">
-A new version of bookie, written in Go :)
+<strong>SAMLA:</strong> A new version of bookie, written in Go :)
 </p>
 
+
+## Running SAMLA
 
 **Run docker container**
 ```
@@ -19,9 +21,14 @@ docker run -e POSTGRES_PASSWORD=bookie -e POSTGRES_USER=bookie -e POSTGRES_DB=bo
 migrate -database postgres://bookie:bookie@localhost:5432/bookie?sslmode=disable -path migrations up
 ```
 
-## Frontend
+### Frontend
 
-**Run svelte**
+**Install dependencies**
+```
+npm install
+```
+
+**Run app**
 ```
 npm run dev
 ```

@@ -37,7 +37,7 @@ export let bookmark: Bookmark
             <i class="fas fa-eye"></i> View
         </a>
         <button on:click={() => HandleDeleteBookmark(bookmark.id)}  class="delete {bookmark.deleted == true ? "red": ""}">
-            <i class="fas fa-trash-alt"></i> {bookmark.deleted == true ? "Deleted": "Delete"}
+            <i class="fas fa-trash-alt"></i> {bookmark.deleted == true ? "Removed": "Trash"}
         </button>
 
         <button on:click={() => HandleArchiveBookmark(bookmark.id)} class="archive {bookmark.archived == true ? "green": ""}">

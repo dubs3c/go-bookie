@@ -36,11 +36,8 @@ function handleClick() {
 
 async function filterBookmarks() {
 	let paginatedObject: Pagination 
-	
-
 	paginatedObject = await GetFilteredBookmarks(currentPage, deletedCheckbox, archiveCheckbox, activeTags)
 	
-
 	currentPage = paginatedObject.page
 	totalPages = paginatedObject.totalPages
 	pageSize = paginatedObject.limit
@@ -96,7 +93,7 @@ function onActiveTag(event) {
 <main>
 	<div class="row">
 		<div class="col">
-			<h1>Go-Bookie!</h1>
+			<h1><a href="/" style="text-decoration:none; color:turquoise;">Go-Bookie!</a></h1>
 			<hr />
 		</div>
 	</div>
@@ -120,7 +117,7 @@ function onActiveTag(event) {
 					<div class="col">
 						<h4>Filter</h4>
 							<label><input type="checkbox" bind:checked={archiveCheckbox} on:change="{filterBookmarks}" /> Archived</label><br />
-							<label><input type="checkbox" bind:checked={deletedCheckbox} on:change="{filterBookmarks}"/> Deleted</label>
+							<label><input type="checkbox" bind:checked={deletedCheckbox} on:change="{filterBookmarks}"/> Trash</label>
 					</div>
 				</div>
 		
@@ -133,20 +130,14 @@ function onActiveTag(event) {
 					</div>
 				</div>
 		
-				<br />
-		
-				<Button value="Filter on tag"/>
-		
 			</Card>
 		</div>
 		<div class="col">
-
 			<PureBookmarkList
 			bookmarks={$bookmarkStore}
 			on:onDeleteBookmark={onDeleteBookmark}
 			on:ArchiveTask={onArchiveTask}
 			/>
-			
 			<div class="row">
 				<p>
 					{#if currentPage > 1 }
@@ -162,10 +153,7 @@ function onActiveTag(event) {
 
 		</div>
 	</div>
-	
-	
-	<br />
 
-	
+	<br />
 	<br />
 </main>
