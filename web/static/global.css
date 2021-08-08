@@ -25,8 +25,14 @@ hr {
     border-top: 1px solid rgba(0,0,0,.1);
 }
 
-
-
+.hr {
+    margin-bottom: 1rem;
+    border: 0;
+    border-bottom-color: currentcolor;
+    border-bottom-style: none;
+    border-bottom-width: 0px;
+    border-bottom: 1px solid rgba(0,0,0,.1);
+}
 
 .container, main {
     max-width: 960px;
@@ -35,8 +41,40 @@ hr {
 
 .col {
     flex-basis: 100%;
-  }
-  
+}
+
+nav {
+    margin-top: 1em;
+}
+
+nav li {
+    list-style: none;
+    display: inline;
+    margin-left: 1em;
+}
+
+nav a {
+    text-decoration: none;
+    color: #40bbaf;
+    font-weight: bold;
+    border: 1px solid rgb(0, 116, 77);
+    padding: 0.5em;
+    border-radius: 8px 8px;
+    font-size: 0.8em;
+}
+
+nav a:hover {
+    color: #ffffff;
+    background-color: rgb(29, 216, 138);
+    border: 1px solid white;
+}
+
+.logout-red:hover {
+    color: red;
+    background-color: darkred;
+    border: 1px solid red;
+}
+
 @media screen and (min-width: 800px) {
     .row {
         display: flex;
