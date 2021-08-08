@@ -5,10 +5,9 @@ import "./tag.css"
 
 export let value = ""
 export let deletable = false
+export let active = false
 
 const dispatch = createEventDispatcher();
-
-let active = false
 
 function handleTagSelection(name: string) {
     active = !active

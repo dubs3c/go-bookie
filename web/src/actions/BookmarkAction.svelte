@@ -9,7 +9,7 @@ export async function CreateBookmark(url: string) {
 	})
 
 	if (response.ok) {
-		return response.json();
+		return []
 	} else {
 		throw new Error(response.statusText);
 	}

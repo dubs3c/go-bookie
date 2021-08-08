@@ -1,28 +1,52 @@
 
 import { writable } from 'svelte/store';
 
-const Bookmarks = () => {
+
+interface Settings {
+  currentPage: number
+  totalPages: number
+  pageSize: number
+  archiveChecked: boolean
+  deletedChecked: boolean
+  activeTags: Record<string, string>
+};
+
+const initialState: Settings = {
+  currentPage: 1,
+  totalPages: 1,
+  pageSize: 10,
+  archiveChecked: false,
+  deletedChecked: false,
+  activeTags: {}
+}
+
+const PageSettings = () => {
   // creates a new writable store populated with some initial data
-  const { subscribe, update, set } = writable([]);
+  const { subscribe, update, set } = writable(initialState);
 
   return {
     subscribe,
     update,
     set,
-    // method to archive a task, think of a action with redux or Vuex
-    archiveBookmark: id =>
-      update(bookmarks =>
-        bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, archived: !bookmark.archived } : bookmark))
-      ),
-    // method to archive a bookmark, think of a action with redux or Vuex
-    deleteBookmark: id =>
-      update(bookmarks =>
-        bookmarks.map(bookmark => (bookmark.id === id ? { ...bookmark, deleted: !bookmark.deleted } : bookmark))
-      ),
+    setCurrentPage: pageNumber => 
+      update(state => (state = {...state, currentPage: pageNumber})),
+    setTotalPages: amountPages =>
+      update(state => (state = {...state, totalPages: amountPages})),
+    setPageSize: pageSize =>
+      update(state => (state = {...state, pageSize: pageSize})),
+    setArchived: checked =>
+      update(state => (state = {...state, archiveChecked: checked})),
+    setDeleted: checked =>
+      update(state => (state = {...state, deletedChecked: checked})),
+    setActiveTags: tags =>
+      update(state => (state = {...state, activeTags: tags})),
+    setAll: all =>
+      update(state => (state = {...all})),     
   };
 };
-export const bookmarkStore = Bookmarks();
 
+export const settingsStore = PageSettings()
+export const bookmarkStore = writable([])
 export const tagStore = writable([])
 
 // store to handle the app state
