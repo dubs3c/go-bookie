@@ -138,13 +138,14 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 // GetBookmark Get a specific bookmark by its ID
 func (s *Server) GetBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmarkID := chi.URLParam(r, "bookmarkID")
+	var htmlBody bool
+	var err error
+
+	if htmlBody, err = strconv.ParseBool(r.URL.Query().Get("htmlbody")); err != nil {
+		htmlBody = false
+	}
 
 	bookmark, err := s.BookmarkRepositoryGetBookmarkByID(bookmarkID)
-
-	if bookmark == (Bookmark{}) {
-		RespondWithStatusCode(w, 404)
-		return
-	}
 
 	if err != nil {
 		log.Println(err)
@@ -152,7 +153,16 @@ func (s *Server) GetBookmark(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RespondWithJSON(w, 200, bookmark)
+	if bookmark.ID < 1 {
+		RespondWithStatusCode(w, 404)
+		return
+	}
+
+	if htmlBody {
+		w.Write([]byte(bookmark.Body))
+	} else {
+		RespondWithJSON(w, 200, bookmark)
+	}
 }
 
 // DeleteBookmark Delete a specific bookmark by its ID

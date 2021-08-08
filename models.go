@@ -1,15 +1,19 @@
 package gobookie
 
+import "time"
+
 // Bookmark Models
 type Bookmark struct {
-	ID          uint   `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Body        string `json:"body"`
-	Image       string `json:"image"`
-	URL         string `json:"url"`
-	Archived    bool   `json:"archived"`
-	Deleted     bool   `json:"deleted"`
+	ID          uint      `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Body        string    `json:"body"`
+	Image       string    `json:"image"`
+	URL         string    `json:"url"`
+	Archived    bool      `json:"archived"`
+	Deleted     bool      `json:"deleted"`
+	Tags        string    `json:"tags"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 // Bookmark list model

@@ -33,7 +33,7 @@ export let bookmark: Bookmark
     </h4>
     <small>{bookmark.url}</small>
     <div class="actions">
-        <a href="\#" class="view">
+        <a href="/bookmark/{bookmark.id}" class="view">
             <i class="fas fa-eye"></i> View
         </a>
         {#if bookmark.deleted}

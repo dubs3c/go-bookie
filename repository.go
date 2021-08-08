@@ -99,10 +99,18 @@ func (s *Server) BookmarkRepositoryGetBookmarkByID(bookmarkID string) (Bookmark,
 	var bookmark Bookmark
 
 	row := s.DB.QueryRow(context.Background(),
-		`SELECT id, title, description, body, image, url, archived, deleted
-	FROM bookmarks WHERE id=$1`, bookmarkID)
+		`SELECT bm.id, bm.title, bm.description, bm.body, bm.image,
+		bm.url, bm.archived, bm.deleted, string_agg(COALESCE(t.name, '')::text, ',') AS tags, bm.created_at
+	FROM bookmarks AS bm
+	LEFT JOIN bookmark_has_tags AS bht
+	ON bht.bookmark_fk = bm.id
+	LEFT JOIN tags AS t
+	ON t.id = bht.tag_fk
+	WHERE bm.id=$1
+	GROUP BY bm.id
+	`, bookmarkID)
 
-	err := row.Scan(&bookmark.ID, &bookmark.Title, &bookmark.Description, &bookmark.Body, &bookmark.Image, &bookmark.URL, &bookmark.Archived, &bookmark.Deleted)
+	err := row.Scan(&bookmark.ID, &bookmark.Title, &bookmark.Description, &bookmark.Body, &bookmark.Image, &bookmark.URL, &bookmark.Archived, &bookmark.Deleted, &bookmark.Tags, &bookmark.CreatedAt)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Println(err)
