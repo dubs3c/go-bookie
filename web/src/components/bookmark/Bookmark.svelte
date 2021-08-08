@@ -56,7 +56,7 @@ export let bookmark: Bookmark
                 {#if bookmark.archived}
                     <i class="fas fa-bookmark"></i> Un-archive
                 {:else}
-                    <i class="fas fa-bookmark"></i> archive
+                    <i class="fas fa-bookmark"></i> Archive
                 {/if}
             </button>
         {/if}

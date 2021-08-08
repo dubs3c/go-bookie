@@ -24,15 +24,18 @@
     color: #cbcbcb;
 }
 
-.bookmark .actions {
-    margin-top: 1em;
-}
-
-.bookmark .actions {
+.bookmark .actions button {
+    font-size: 12px;
+    background: none;
+    border: none;
+    color: #cbcbcb;
+    cursor: pointer;
     font-family: 'Courier New', Courier, monospace;
 }
 
 .bookmark .actions {
+    margin-top: 1em;
+    font-family: 'Courier New', Courier, monospace;
     font-size: smaller;
 }
 
