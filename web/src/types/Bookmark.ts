@@ -9,7 +9,8 @@ export interface Bookmark {
     image: string;
     archived: boolean;
     deleted: boolean;
-    tags: string
+    tags: string;
+    createdAt: string
 };
 
 

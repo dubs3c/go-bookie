@@ -10,6 +10,7 @@ import (
 	gobookie "github.com/dubs3c/go-bookie"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 func banner() {
@@ -34,6 +35,16 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
 	pgxpool, err := gobookie.DBInit()
 
 	if err != nil {
@@ -54,12 +65,12 @@ func main() {
 				r.Put("/", s.UpdateBookmark)
 				r.Patch("/", s.UpdateBookmark)
 				r.Delete("/", s.DeleteBookmark)
-				r.Options("/", s.CorsOptions)
 			})
 		})
 		r.Route("/tags", func(r chi.Router) {
 			r.Get("/", s.ListTags)
 			r.Post("/", s.CreateTag)
+			r.Delete("/", s.DeleteTag)
 			r.Put("/", s.UpdateTag)
 		})
 	})
@@ -67,8 +78,8 @@ func main() {
 	HTTPServer := &http.Server{
 		Addr:           "127.0.0.1:8080",
 		Handler:        r,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		ReadTimeout:    5 * time.Second,
+		WriteTimeout:   7 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 

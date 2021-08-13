@@ -13,7 +13,7 @@ type Bookmark struct {
 	Archived    bool      `json:"archived"`
 	Deleted     bool      `json:"deleted"`
 	Tags        string    `json:"tags"`
-	CreatedAt   time.Time `json:"created_at"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 // Bookmark list model

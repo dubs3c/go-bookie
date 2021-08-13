@@ -98,6 +98,7 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int, archived
 func (s *Server) BookmarkRepositoryGetBookmarkByID(bookmarkID string) (Bookmark, error) {
 	var bookmark Bookmark
 
+	// TODO - Consider creating two queries so we can extract all tag data and return a list of tags
 	row := s.DB.QueryRow(context.Background(),
 		`SELECT bm.id, bm.title, bm.description, bm.body, bm.image,
 		bm.url, bm.archived, bm.deleted, string_agg(COALESCE(t.name, '')::text, ',') AS tags, bm.created_at
@@ -249,9 +250,12 @@ func (s *Server) TagsRepositoryUpdateTagByID(tagID int, TagNameUpdate string) er
 	return err
 }
 
-func (s *Server) TagsRepositoryDeleteTagByBookmarkIDAndTagID(bookmarkID int, tagID int) error {
+func (s *Server) TagsRepositoryDeleteTagByBookmarkIDAndTagID(bookmarkID int, tagName string) error {
 	_, err := s.DB.Query(context.Background(),
-		`DELETE FROM bookmark_has_tags
-		WHERE bookmark_fk = $1 AND tag_fk = $2`, bookmarkID, tagID)
+		`DELETE FROM bookmark_has_tags AS bht
+		WHERE bht.bookmark_fk = $1 AND tag_fk IN (
+			SELECT t.id FROM tags AS t
+			WHERE t.name = $2
+		)`, bookmarkID, tagName)
 	return err
 }

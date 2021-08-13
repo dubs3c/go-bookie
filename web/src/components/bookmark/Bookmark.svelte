@@ -41,7 +41,7 @@ export let bookmark: Bookmark
                 <i class="fas fa-trash-alt"></i> Delete
             </button>
 
-            <button on:click={() => ChangeStatus(bookmark.id, false, bookmark.archived)}  class="delete blue">
+            <button on:click={() => ChangeStatus(bookmark.id, false, bookmark.archived)}  class="blue">
                 <i class="fas fa-trash-alt"></i> Restore
             </button>
         {:else}
@@ -64,7 +64,7 @@ export let bookmark: Bookmark
         {#if bookmark.tags != ""}
         <br />
             {#each bookmark.tags.split(",") as tag}
-                <Tag value="{tag}"/>
+                <Tag value="{tag}" selectable="{false}"/>
             {/each}
         {/if}
 

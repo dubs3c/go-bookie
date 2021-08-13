@@ -288,10 +288,33 @@ func (s *Server) CreateTag(w http.ResponseWriter, r *http.Request) {
 
 	if err := s.TagsRepositoryCreateTag(tagData.BookmarkID, tagData.TagName); err != nil {
 		RespondWithError(w, 500, "Could not create tag")
+		log.Println(err)
 		return
 	}
 
 	RespondWithStatusCode(w, 201)
+}
+
+func (s *Server) DeleteTag(w http.ResponseWriter, r *http.Request) {
+	tagData := &CreateTagRequest{}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	if err := json.NewDecoder(r.Body).Decode(tagData); err != nil {
+		RespondWithError(w, 400, "Error decoding json. The bookmark id needs to be an interger and the tag name a string")
+	}
+
+	if tagData.TagName == "" {
+		RespondWithError(w, 400, "You need to specify a tag name")
+		return
+	}
+
+	if err := s.TagsRepositoryDeleteTagByBookmarkIDAndTagID(tagData.BookmarkID, tagData.TagName); err != nil {
+		log.Println(err)
+		RespondWithError(w, 500, "Could not delete tag")
+		return
+	}
+
+	RespondWithStatusCode(w, 204)
 }
 
 func (s *Server) UpdateTag(w http.ResponseWriter, r *http.Request) {

@@ -15,4 +15,34 @@ export async function GetTags() {
 	}
 }
 
+
+export async function AddTagToBookmark(bookmarkID: number, tagName: string) {
+
+	await fetch(baseURL + "/v1/tags", {
+		method: 'POST',
+		body: JSON.stringify({bookmarkID, tagName})
+	}).then(response => {
+		if(response.ok) {
+			return response.json();
+		}
+	}).catch(error => {
+		return error
+	});
+}
+
+
+export async function DeleteTagFromBookmark(bookmarkID: number, tagName: string) {
+
+	await fetch(baseURL + "/v1/tags", {
+		method: 'DELETE',
+		body: JSON.stringify({bookmarkID, tagName})
+	}).then(response => {
+		if(response.ok) {
+			return response.json();
+		}
+	}).catch(error => {
+		return error
+	});
+}
+
 </script>

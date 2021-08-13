@@ -122,6 +122,9 @@ function onActiveTag(event) {
 		</Card>
 	</div>
 	<div class="col">
+		{#if $settingsStore.deletedChecked}
+			<small style="color:lightsteelblue;"><i>Items in trash will be deleted after 30 days</i></small>
+		{/if}
 		<PureBookmarkList
 		bookmarks={$bookmarkStore}
 		on:onDeleteBookmark={onDeleteBookmark}
