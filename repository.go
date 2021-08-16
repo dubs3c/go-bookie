@@ -7,6 +7,22 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+// GetAccessToken Looks up access token in DB and returns corresponding user id
+func (s *Server) GetAccessToken(token string) (int, error) {
+	var userID int = 0
+	err := s.DB.QueryRow(context.Background(), `
+		SELECT user_fk
+		FROM access_tokens
+		WHERE token = $1
+		`, token).Scan(&userID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return userID, err
+}
+
 // BookmarkRepositoryInsert - Insert bookmark into database
 func (s *Server) BookmarkRepositoryInsert(bookmark *CreateBookmarkRequest) (int, error) {
 	var last int = 0

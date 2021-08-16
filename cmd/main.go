@@ -32,18 +32,8 @@ func banner() {
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
 
-	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"*"},
-		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
+	r := chi.NewRouter()
 
 	pgxpool, err := gobookie.DBInit()
 
@@ -55,6 +45,20 @@ func main() {
 		DB:     pgxpool,
 		Router: r,
 	}
+
+	r.Use(middleware.Logger)
+	r.Use(s.Authentication)
+	r.Use(middleware.Recoverer)
+
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Route("/bookmarks", func(r chi.Router) {

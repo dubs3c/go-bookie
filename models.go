@@ -2,6 +2,12 @@ package gobookie
 
 import "time"
 
+type UserIDContext string
+
+func (c UserIDContext) String() string {
+	return string(c)
+}
+
 // Bookmark Models
 type Bookmark struct {
 	ID          uint      `json:"id"`
