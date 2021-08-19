@@ -20,6 +20,17 @@ const initialState: Settings = {
   activeTags: {}
 }
 
+const AuthLocalStore = () => {
+  return {
+    addToken: (token: string) =>
+      localStorage.setItem("accesstoken", token),
+    getToken: () =>
+      localStorage.getItem("accesstoken"),
+    removeToken: () =>
+      localStorage.removeItem("accesstoken")
+  }
+}
+
 const PageSettings = () => {
   // creates a new writable store populated with some initial data
   const { subscribe, update, set } = writable(initialState);
@@ -45,6 +56,7 @@ const PageSettings = () => {
   };
 };
 
+export const authStore = AuthLocalStore()
 export const settingsStore = PageSettings()
 export const bookmarkStore = writable([])
 export const tagStore = writable([])

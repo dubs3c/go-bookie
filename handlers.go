@@ -77,6 +77,7 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 
 // ListBookmarks Return all bookmarks
 func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
+	userData := r.Context().Value(UserData(UserRequestData{})).(*UserRequestData)
 	var (
 		pageNumber    int
 		bookmarkLimit int
@@ -110,7 +111,7 @@ func (s *Server) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 		tagList = []string{}
 	}
 
-	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks(pageNumber, bookmarkLimit, archived, deleted, tagList)
+	bookmarks, err := s.BookmarkRepositoryGetAllBookmarks(userData.UserID, pageNumber, bookmarkLimit, archived, deleted, tagList)
 
 	if err != nil {
 		RespondWithError(w, 500, "Something went wrong while fetching bookmarks")
@@ -379,4 +380,51 @@ func patch(v interface{}, bookmark *Bookmark) error {
 		}
 	}
 	return nil
+}
+
+// UserLogin logs in a user to the application, returns an access token
+func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
+	loginRequest := &UserLoginRequest{}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	if err := json.NewDecoder(r.Body).Decode(loginRequest); err != nil {
+		RespondWithError(w, 400, "Error decoding json. Please specify username and password")
+		return
+	}
+
+	if loginRequest.Password == "" || loginRequest.Email == "" {
+		RespondWithError(w, 400, "Please specify username AND password")
+		return
+	}
+
+	userID, err := s.AuthenticateUser(loginRequest.Email, loginRequest.Password)
+
+	if err != nil {
+		RespondWithError(w, 401, "Wrong username or password")
+		return
+	}
+
+	accessToken, err := s.CreateAccessToken(userID)
+
+	if err != nil {
+		RespondWithError(w, 500, "Something went wrong :( Send help...")
+		return
+	}
+
+	RespondWithJSON(w, 201, &TokenResponse{Token: accessToken})
+}
+
+// UserLogout logs out a user by deleting the user's access token from DB
+func (s *Server) UserLogout(w http.ResponseWriter, r *http.Request) {
+	rq := r.Context().Value(UserData(UserRequestData{})).(*UserRequestData)
+	if err := s.DeleteAccessToken(rq.Token); err != nil {
+		RespondWithStatusCode(w, 401)
+		return
+	}
+	RespondWithStatusCode(w, 200)
+}
+
+// UserRegister registers a user in the application
+func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
+
 }

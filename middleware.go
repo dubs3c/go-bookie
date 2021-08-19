@@ -16,7 +16,7 @@ func (s *Server) Authentication(next http.Handler) http.Handler {
 			bearerValue []string
 			userID      int
 			err         error
-			token       UserIDContext
+			token       string
 		)
 
 		if authHeader = r.Header.Get("Authorization"); authHeader == "" {
@@ -29,14 +29,20 @@ func (s *Server) Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		token = UserIDContext(bearerValue[1])
+		token = bearerValue[1]
 
-		if userID, err = s.GetAccessToken(token.String()); err != nil {
+		// Should probably check if token is valid as well :)
+		if userID, err = s.GetAccessToken(token); err != nil {
 			w.WriteHeader(401)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), token, userID)
+		rq := &UserRequestData{
+			Token:  token,
+			UserID: userID,
+		}
+
+		ctx := context.WithValue(r.Context(), UserData(UserRequestData{}), rq)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 

@@ -11,9 +11,11 @@ CREATE TABLE IF NOT EXISTS users (
     last_login      timestamp(6) with time zone DEFAULT NULL::timestamp(6) with time zone
 );
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE IF NOT EXISTS access_tokens (
     id          SERIAL PRIMARY KEY,
-    token       VARCHAR(100) UNIQUE NOT NULL,
+    token       UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
     user_fk     INTEGER,
     created_at  timestamp(6) with time zone DEFAULT CURRENT_TIMESTAMP(6),
     FOREIGN KEY (user_fk) REFERENCES users(id) ON DELETE CASCADE

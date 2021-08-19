@@ -2,10 +2,11 @@ package gobookie
 
 import "time"
 
-type UserIDContext string
+type UserData UserRequestData
 
-func (c UserIDContext) String() string {
-	return string(c)
+type UserRequestData struct {
+	Token  string
+	UserID int
 }
 
 // Bookmark Models
@@ -78,4 +79,13 @@ type Tag struct {
 
 type Tags struct {
 	Tags []Tag
+}
+
+type UserLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type TokenResponse struct {
+	Token string `json:"token"`
 }

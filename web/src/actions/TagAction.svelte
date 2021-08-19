@@ -2,9 +2,11 @@
 
 import {baseURL} from "./../config.dev.js";
 
+import {AuthenticatedFetch} from "./Util.svelte"
+
 export async function GetTags() {
 
-	const response = await fetch(baseURL + "/v1/tags", {
+	const response = await AuthenticatedFetch(baseURL + "/v1/tags", {
 		method: 'GET'
 	})
 
@@ -18,7 +20,7 @@ export async function GetTags() {
 
 export async function AddTagToBookmark(bookmarkID: number, tagName: string) {
 
-	await fetch(baseURL + "/v1/tags", {
+	await AuthenticatedFetch(baseURL + "/v1/tags", {
 		method: 'POST',
 		body: JSON.stringify({bookmarkID, tagName})
 	}).then(response => {
@@ -33,7 +35,7 @@ export async function AddTagToBookmark(bookmarkID: number, tagName: string) {
 
 export async function DeleteTagFromBookmark(bookmarkID: number, tagName: string) {
 
-	await fetch(baseURL + "/v1/tags", {
+	await AuthenticatedFetch(baseURL + "/v1/tags", {
 		method: 'DELETE',
 		body: JSON.stringify({bookmarkID, tagName})
 	}).then(response => {

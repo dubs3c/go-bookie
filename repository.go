@@ -23,6 +23,32 @@ func (s *Server) GetAccessToken(token string) (int, error) {
 	return userID, err
 }
 
+func (s *Server) AuthenticateUser(username string, password string) (int, error) {
+	var userID int = 0
+	err := s.DB.QueryRow(context.Background(), `
+		SELECT id
+		FROM users
+		WHERE email = $1 AND password = $2
+		`, username, password).Scan(&userID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return userID, err
+}
+
+func (s *Server) CreateAccessToken(userID int) (string, error) {
+	token := ""
+	err := s.DB.QueryRow(context.Background(), "INSERT INTO access_tokens(user_fk) values($1) RETURNING token", userID).Scan(&token)
+	return token, err
+}
+
+func (s *Server) DeleteAccessToken(token string) error {
+	_, err := s.DB.Query(context.Background(), "DELETE FROM access_tokens WHERE token = $1", token)
+	return err
+}
+
 // BookmarkRepositoryInsert - Insert bookmark into database
 func (s *Server) BookmarkRepositoryInsert(bookmark *CreateBookmarkRequest) (int, error) {
 	var last int = 0
@@ -50,7 +76,7 @@ func (s *Server) BookmarkRepositoryCount() (int, error) {
 }
 
 // BookmarkRepositoryGetAllBookmarks - Get all bookmarks from database
-func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int, archived bool, deleted bool, tags []string) ([]*BookmarkList, error) {
+func (s *Server) BookmarkRepositoryGetAllBookmarks(userID int, page int, limit int, archived bool, deleted bool, tags []string) ([]*BookmarkList, error) {
 
 	var (
 		bm     []*BookmarkList
@@ -73,23 +99,23 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int, archived
 	LEFT JOIN bookmark_has_tags AS bht ON bht.bookmark_fk = b.id
 	LEFT JOIN tags AS t ON t.id = bht.tag_fk `
 
-	sqlWhere := "WHERE b.deleted = $1 AND b.archived = $2 "
+	sqlWhere := "WHERE b.user_fk = $1 AND b.deleted = $2 AND b.archived = $3 "
 
 	if len(tags) >= 1 {
-		sqlWhere += "AND t.name = ANY($5) "
+		sqlWhere += "AND t.name = ANY($6) "
 	}
 
 	sqlGroup := `
 	GROUP BY b.id
 	ORDER BY b.id desc
-	LIMIT $3 OFFSET $4`
+	LIMIT $4 OFFSET $5`
 
 	sqlQuery := sqlSelect + sqlWhere + sqlGroup
 
 	if len(tags) >= 1 {
-		rows, err = s.DB.Query(context.Background(), sqlQuery, deleted, archived, limit, offset, tags)
+		rows, err = s.DB.Query(context.Background(), sqlQuery, userID, deleted, archived, limit, offset, tags)
 	} else {
-		rows, err = s.DB.Query(context.Background(), sqlQuery, deleted, archived, limit, offset)
+		rows, err = s.DB.Query(context.Background(), sqlQuery, userID, deleted, archived, limit, offset)
 	}
 
 	if err != nil {

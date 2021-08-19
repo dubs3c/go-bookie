@@ -1,9 +1,12 @@
 <script context="module" lang="ts">
 
+import type { Pagination } from "../types/Pagination.js";
 import {baseURL} from "./../config.dev.js";
 
+import {AuthenticatedFetch} from "./Util.svelte"
+
 export async function CreateBookmark(url: string) {
-	const response = await fetch(baseURL + "/v1/bookmarks", {
+	const response = await AuthenticatedFetch(baseURL + "/v1/bookmarks", {
 		method: 'POST',
 		body: JSON.stringify({url})
 	})
@@ -19,7 +22,7 @@ export async function GetBookmarks(page: number) {
 	if(page == 0) {
 		page = 1
 	}
-	const response = await fetch(baseURL + "/v1/bookmarks?page=" + page, {
+	const response = await AuthenticatedFetch(baseURL + "/v1/bookmarks?page=" + page, {
 		method: 'GET'
 	})
 
@@ -30,7 +33,8 @@ export async function GetBookmarks(page: number) {
 	}
 }
 
-export async function GetFilteredBookmarks(page: number, deleted: boolean, archived: boolean, tags: Record<string, string>) {
+export async function GetFilteredBookmarks(page: number, deleted: boolean,
+archived: boolean, tags: Record<string, string>): Promise<Pagination> {
 	if(page == 0) {
 		page = 1
 	}
@@ -59,19 +63,19 @@ export async function GetFilteredBookmarks(page: number, deleted: boolean, archi
 		url += filter
 	}
 
-	const response = await fetch(baseURL + url, {
+	let response = await AuthenticatedFetch(baseURL + url, {
 		method: 'GET'
 	})
 
-	if (response.ok) {
-		return response.json();
+	if(response.ok) {
+		return response.json() as Promise<Pagination>
 	} else {
-		throw new Error(response.statusText);
+		throw new Error("Error fetching bookmarks: " + response.statusText)
 	}
 }
 
 export async function DeleteBookmark(id: number) {
-	await fetch(baseURL + "/v1/bookmarks/"+id, {
+	await AuthenticatedFetch(baseURL + "/v1/bookmarks/"+id, {
 		method: "DELETE"
 	}).then(response => {
 		if(response.ok) {
@@ -84,7 +88,7 @@ export async function DeleteBookmark(id: number) {
 }
 
 export async function ToggleStatus(id: number, deleted: boolean, archived: boolean) {
-	await fetch(baseURL + "/v1/bookmarks/"+id, {
+	await AuthenticatedFetch(baseURL + "/v1/bookmarks/"+id, {
 		method: "PATCH",
 		body: JSON.stringify({deleted, archived})
 	}).then(response => {
@@ -99,7 +103,7 @@ export async function ToggleStatus(id: number, deleted: boolean, archived: boole
 
 export async function ArchiveBookmark(id: number) {
 	let archived = true
-	await fetch(baseURL + "/v1/bookmarks/"+id, {
+	await AuthenticatedFetch(baseURL + "/v1/bookmarks/"+id, {
 		method: "PATCH",
 		body: JSON.stringify({archived})
 	}).then(response => {

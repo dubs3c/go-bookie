@@ -47,7 +47,7 @@ func main() {
 	}
 
 	r.Use(middleware.Logger)
-	r.Use(s.Authentication)
+	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 
 	r.Use(cors.Handler(cors.Options{
@@ -61,22 +61,30 @@ func main() {
 	}))
 
 	r.Route("/v1", func(r chi.Router) {
-		r.Route("/bookmarks", func(r chi.Router) {
-			r.Get("/", s.ListBookmarks)
-			r.Post("/", s.CreateBookmark)
-			r.Route("/{bookmarkID}", func(r chi.Router) {
-				r.Get("/", s.GetBookmark)
-				r.Put("/", s.UpdateBookmark)
-				r.Patch("/", s.UpdateBookmark)
-				r.Delete("/", s.DeleteBookmark)
+		r.Post("/login", s.UserLogin)
+		r.With(s.Authentication).Get("/logout", s.UserLogout)
+		r.Post("/register", s.UserRegister)
+		r.Group(func(r chi.Router) {
+			r.Use(s.Authentication)
+			r.Route("/bookmarks", func(r chi.Router) {
+				r.Get("/", s.ListBookmarks)
+				r.Post("/", s.CreateBookmark)
+				r.Route("/{bookmarkID}", func(r chi.Router) {
+					r.Get("/", s.GetBookmark)
+					r.Put("/", s.UpdateBookmark)
+					r.Patch("/", s.UpdateBookmark)
+					r.Delete("/", s.DeleteBookmark)
+				})
+			})
+			r.Route("/tags", func(r chi.Router) {
+				r.Use(s.Authentication)
+				r.Get("/", s.ListTags)
+				r.Post("/", s.CreateTag)
+				r.Delete("/", s.DeleteTag)
+				r.Put("/", s.UpdateTag)
 			})
 		})
-		r.Route("/tags", func(r chi.Router) {
-			r.Get("/", s.ListTags)
-			r.Post("/", s.CreateTag)
-			r.Delete("/", s.DeleteTag)
-			r.Put("/", s.UpdateTag)
-		})
+
 	})
 
 	HTTPServer := &http.Server{
