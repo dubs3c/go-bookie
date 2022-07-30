@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  web:
+    container_name: gobookie-web
+    image: node:18.7-alpine3.15
+    working_dir: /app
+    command: sh entrypoint.sh
+    ports:
+      - "0.0.0.0:3000:3000"
+    volumes:
+      - ".:/app"
+    expose:
+      - "3000"
+    #env_file:
+    #  - /root/bookie.env
+    #  - /root/bookie.db.env
+  
+  api:
+    image: golang:1.18.4-alpine3.16
+    volumes:
+      - ".:/app"
+    working_dir: /app
+    command: "sh -c 'go build cmd/main.go && ./main'"
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:14.4-alpine
+    environment:
+      - POSTGRES_DB=bookie
+      - POSTGRES_USER=bookie
+      - POSTGRES_PASSWORD=bookie
+    ports:
+      - "5432:5432"
+    #env_file:
+    #  - /root/bookie.db.env
+    #volumes:
+    #  - /var/lib/bookie/postgresql/data:/var/lib/postgresql/data

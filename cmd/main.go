@@ -76,7 +76,7 @@ func main() {
 	})
 
 	HTTPServer := &http.Server{
-		Addr:           "127.0.0.1:8080",
+		Addr:           "0.0.0.0:8080",
 		Handler:        r,
 		ReadTimeout:    5 * time.Second,
 		WriteTimeout:   7 * time.Second,

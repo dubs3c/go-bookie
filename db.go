@@ -9,7 +9,7 @@ import (
 
 // DBInit - Connects to database
 func DBInit() (*pgxpool.Pool, error) {
-	config, err := pgxpool.ParseConfig("host=127.0.0.1 port=5432 user=bookie dbname=bookie password=bookie sslmode=disable")
+	config, err := pgxpool.ParseConfig("host=postgres port=5432 user=bookie dbname=bookie password=bookie sslmode=disable")
 
 	if err != nil {
 		log.Fatal("Error setting up DB: ", err)
