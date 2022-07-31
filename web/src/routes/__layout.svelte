@@ -1,5 +1,6 @@
 <script>
     import "../static/global.css"
+    import "../static/grid.css"
 </script>
 
 <main>

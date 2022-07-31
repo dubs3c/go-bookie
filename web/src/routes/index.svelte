@@ -87,7 +87,7 @@ function onActiveTag(event) {
 
 
 <div class="row">
-	<div class="col">
+	<div class="col-4">
 		<Card>
 			<div class="row">
 				<div class="col">
@@ -121,7 +121,7 @@ function onActiveTag(event) {
 	
 		</Card>
 	</div>
-	<div class="col">
+	<div class="col-8">
 		{#if $settingsStore.deletedChecked}
 			<small style="color:lightsteelblue;"><i>Items in trash will be deleted after 30 days</i></small>
 		{/if}
