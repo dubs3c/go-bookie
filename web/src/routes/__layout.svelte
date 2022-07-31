@@ -1,5 +1,5 @@
 <script>
-    import "../../static/global.css"
+    import "../static/global.css"
 </script>
 
 <main>

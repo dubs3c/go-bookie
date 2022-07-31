@@ -2,8 +2,8 @@
 	/**
 	 * @type {import('@sveltejs/kit').Load}
 	 */
-	export async function load({ page, fetch, session, context }) {
-		const url = `http://localhost:8080/v1/bookmarks/`+ page.params.id;
+	export async function load({ fetch, params }) {
+		const url = `http://localhost:8080/v1/bookmarks/`+ params.id;
 		const res = await fetch(url);
 
 		if (res.ok) {
@@ -31,9 +31,9 @@ import type { Bookmark } from '../../types/Bookmark';
 
 export let detail: Bookmark;
 
-const ref = document.referrer;
-
 let newTag: string =  ""
+
+let ref: string = ""
 
 $: currentTags = []
 
@@ -65,6 +65,7 @@ async function deleteTag(event) {
 
 }
 onMount(() => {
+    ref = document.referrer;
     currentTags = detail.tags.split(",")
 })
 
