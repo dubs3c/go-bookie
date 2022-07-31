@@ -3,7 +3,7 @@
 	 * @type {import('@sveltejs/kit').Load}
 	 */
 	export async function load({ page, fetch, session, context }) {
-		const url = `http://127.0.0.1:8080/v1/bookmarks/`+ page.params.id;
+		const url = `http://localhost:8080/v1/bookmarks/`+ page.params.id;
 		const res = await fetch(url);
 
 		if (res.ok) {
@@ -104,7 +104,7 @@ onMount(() => {
 <br />
 <br />
 {#if detail.body }
-    <iframe src="http://127.0.0.1:8080/v1/bookmarks/{detail.id}?htmlbody=true" sandbox title="Body" width="100%" height="600px">
+    <iframe src="http://localhost:8080/v1/bookmarks/{detail.id}?htmlbody=true" sandbox title="Body" width="100%" height="600px">
         <p>Your browser does not support iframes.</p>
     </iframe>
 
