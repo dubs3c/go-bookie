@@ -26,6 +26,10 @@ function handleClick() {
 	}
 }
 
+function expandMe() {
+	active = !active
+}
+
 async function filterBookmarks() {
 	// Reset current page to 1 to ensure when a new filter is made, we request page 1 first
 	$settingsStore.currentPage = 1
@@ -79,6 +83,8 @@ function onActiveTag(event) {
 	filterBookmarks()
 }
 
+let active = true;
+
 </script>
 
 <svelte:head>
@@ -86,68 +92,77 @@ function onActiveTag(event) {
 </svelte:head>
 
 
-<div class="row">
-	<div class="col">
-		<Card>
-			<div class="row">
-				<div class="col">
-					<h4>Save a link!</h4>
-					<Input on:inputText={ handleBookmarkInput } placeholder="Enter URL or some text"/>
-					<Button on:buttonClick={ handleClick } value="Save bookmark!"/>
-					{#await promise}
-						<p><i>Adding bookmark...</i></p>
-					{:catch error}
-						<p style="color: red"><small>Could not create bookmark 😭 <strong>Error: {error.message}</strong></small></p>
-					{/await}
+	<div class="row">
+		<div class="col">
+			<Card>
+				<div class="row">
+					<div class="col">
+						<h4>Save a link!</h4>
+						<Input on:inputText={ handleBookmarkInput } placeholder="Enter URL or some text"/>
+						<Button on:buttonClick={ handleClick } fullWidth={true} value="Save bookmark!"/>
+						{#await promise}
+							<p><i>Adding bookmark...</i></p>
+						{:catch error}
+							<p style="color: red"><small>Could not create bookmark 😭 <strong>Error: {error.message}</strong></small></p>
+						{/await}
+					</div>
 				</div>
-			</div>
 
-			<div class="row">
-				<div class="col">
-					<h4>Filter</h4>
-						<label><input type="checkbox" bind:checked={$settingsStore.archiveChecked} on:change="{filterBookmarks}" /> Archived</label><br />
-						<label><input type="checkbox" bind:checked={$settingsStore.deletedChecked} on:change="{filterBookmarks}"/> Trash</label>
+				<div class="row">
+					<div class="col">
+						<h4>Filter</h4>
+							<label><input type="checkbox" bind:checked={$settingsStore.archiveChecked} on:change="{filterBookmarks}" /> Archived</label><br />
+							<label><input type="checkbox" bind:checked={$settingsStore.deletedChecked} on:change="{filterBookmarks}"/> Trash</label>
+					</div>
 				</div>
-			</div>
-	
-			<div class="row">
-				<div class="col">
-					<h4>Tags</h4>
-					{#each $tagStore as tag}
-						<Tag on:onActiveTag={onActiveTag} value="{tag.name}" active="{$settingsStore.activeTags[tag.name] === "" ? true : false}" />
-					{/each}
+		
+				<div class="row">
+					<div class="col">
+						<h4>Tags</h4>
+						<Button on:buttonClick={ expandMe } small={true} info={true} fullWidth={true} value="List all tags"/>
+						<br />
+						<br />
+						<div class="{active ? 'user-tag-list' : ''}">
+							{#each $tagStore as tag}
+								<Tag on:onActiveTag={onActiveTag} value="{tag.name}" active="{$settingsStore.activeTags[tag.name] === "" ? true : false}" />
+							{/each}
+						</div>
+					</div>
 				</div>
-			</div>
-	
-		</Card>
-	</div>
-	<div class="col">
-		{#if $settingsStore.deletedChecked}
-			<small style="color:lightsteelblue;"><i>Items in trash will be deleted after 30 days</i></small>
-		{/if}
-		<PureBookmarkList
-		bookmarks={$bookmarkStore}
-		on:onDeleteBookmark={onDeleteBookmark}
-		on:ArchiveTask={onArchiveTask}
-		/>
-		<div class="row">
-			<p>
-				{#if $settingsStore.currentPage > 1 }
-					<button on:click={() => changePage(1)}>« first</button> <button on:click={() => changePage($settingsStore.currentPage-1)}>previous</button>
-				{/if}
-				<!--
-					TODO 1: Bug here regarding totalPages being incorrent, sent by the server				
-				-->
-				Page {$settingsStore.currentPage} of {$settingsStore.totalPages}
-				{#if $settingsStore.totalPages > 1 }
-					<button on:click={() => changePage($settingsStore.currentPage+1)}>next</button>
-					<button on:click={() => changePage($settingsStore.totalPages)}>last »</button>
-				{/if}
-			</p>
+		
+			</Card>
 		</div>
 
 	</div>
-</div>
+	<br />
+	<div class="row">
+		<div class="col">
+			{#if $settingsStore.deletedChecked}
+				<small style="color:lightsteelblue;"><i>Items in trash will be deleted after 30 days</i></small>
+			{/if}
+			<PureBookmarkList
+			bookmarks={$bookmarkStore}
+			on:onDeleteBookmark={onDeleteBookmark}
+			on:ArchiveTask={onArchiveTask}
+			/>
+			<div class="row">
+				<p>
+					{#if $settingsStore.currentPage > 1 }
+						<button on:click={() => changePage(1)}>« first</button> <button on:click={() => changePage($settingsStore.currentPage-1)}>previous</button>
+					{/if}
+					<!--
+						TODO 1: Bug here regarding totalPages being incorrent, sent by the server				
+					-->
+					Page {$settingsStore.currentPage} of {$settingsStore.totalPages}
+					{#if $settingsStore.totalPages > 1 }
+						<button on:click={() => changePage($settingsStore.currentPage+1)}>next</button>
+						<button on:click={() => changePage($settingsStore.totalPages)}>last »</button>
+					{/if}
+				</p>
+			</div>
+
+		</div>
+	</div>
 
 <br />
 <br />

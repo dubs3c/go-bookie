@@ -10,6 +10,7 @@
     export let fullWidth = false
     export let danger = false
     export let success = false
+    export let info = false
 
 	function handleClick() {
 		dispatch('buttonClick', {});
@@ -24,5 +25,6 @@
     class:small={small}
     class:fullWidth={fullWidth}
     class:danger={danger}
+    class:info={info}
     class:success={success}>
     {value}</button>
