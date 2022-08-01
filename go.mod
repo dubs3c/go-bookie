@@ -8,4 +8,5 @@ require (
 	github.com/go-chi/cors v1.2.0 // indirect
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/json-iterator/go v1.1.10
+	github.com/sirupsen/logrus v1.4.2 // indirect
 )
