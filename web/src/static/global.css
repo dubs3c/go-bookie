@@ -70,3 +70,8 @@ nav a:hover {
     background-color: darkred;
     border: 1px solid red;
 }
+
+.user-tag-list {
+    height: 100px;
+    overflow-y: hidden;
+}
