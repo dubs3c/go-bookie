@@ -17,6 +17,7 @@ func (s *Server) BookmarkRepositoryInsert(bookmark *CreateBookmarkRequest) (int,
 // BookmarkRepositoryCount Get total amount of bookmarks
 func (s *Server) BookmarkRepositoryCount() (int, error) {
 	var count int
+	// TODO - Don't forget to include user id here later
 	rows, err := s.DB.Query(context.Background(), "SELECT count(*) as count FROM bookmarks")
 
 	if err != nil {
@@ -48,7 +49,7 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int, archived
 	if page <= 1 {
 		offset = 0
 	} else {
-		offset = limit*page - limit
+		offset = limit + page
 	}
 
 	sqlSelect := `
