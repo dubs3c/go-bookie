@@ -17,6 +17,7 @@ func (s *Server) BookmarkRepositoryInsert(bookmark *CreateBookmarkRequest) (int,
 // BookmarkRepositoryCount Get total amount of bookmarks
 func (s *Server) BookmarkRepositoryCount() (int, error) {
 	var count int
+	// TODO - Don't forget to include user id here later
 	rows, err := s.DB.Query(context.Background(), "SELECT count(*) as count FROM bookmarks")
 
 	if err != nil {
@@ -48,7 +49,7 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int, archived
 	if page <= 1 {
 		offset = 0
 	} else {
-		offset = limit*page - limit
+		offset = limit + page
 	}
 
 	sqlSelect := `
@@ -57,22 +58,42 @@ func (s *Server) BookmarkRepositoryGetAllBookmarks(page int, limit int, archived
 	LEFT JOIN bookmark_has_tags AS bht ON bht.bookmark_fk = b.id
 	LEFT JOIN tags AS t ON t.id = bht.tag_fk `
 
-	sqlWhere := "WHERE b.deleted = $1 AND b.archived = $2 "
-
 	if len(tags) >= 1 {
-		sqlWhere += "AND t.name = ANY($5) "
-	}
 
-	sqlGroup := `
-	GROUP BY b.id
-	ORDER BY b.id desc
-	LIMIT $3 OFFSET $4`
+		// TODO: improve this shit
+		sqlWhere := `
+		WHERE b.id IN (
+		SELECT b.id
+		FROM tags AS t
+		LEFT JOIN bookmark_has_tags AS bht ON bht.tag_fk = t.id
+		LEFT JOIN bookmarks AS b ON b.id = bht.bookmark_fk
+		WHERE t.name = ANY($3)
+		GROUP BY b.id)
+		`
 
-	sqlQuery := sqlSelect + sqlWhere + sqlGroup
+		sqlGroup := `
+		GROUP BY b.id
+		ORDER BY b.id desc
+		LIMIT $1 OFFSET $2`
 
-	if len(tags) >= 1 {
-		rows, err = s.DB.Query(context.Background(), sqlQuery, deleted, archived, limit, offset, tags)
+		sqlQuery := sqlSelect + sqlWhere + sqlGroup
+
+		rows, err = s.DB.Query(context.Background(), sqlQuery, limit, offset, tags)
 	} else {
+
+		sqlWhere := "WHERE b.deleted = $1 AND b.archived = $2 "
+
+		if len(tags) >= 1 {
+			sqlWhere += "AND t.name = ANY($5) "
+		}
+
+		sqlGroup := `
+		GROUP BY b.id
+		ORDER BY b.id desc
+		LIMIT $3 OFFSET $4`
+
+		sqlQuery := sqlSelect + sqlWhere + sqlGroup
+
 		rows, err = s.DB.Query(context.Background(), sqlQuery, deleted, archived, limit, offset)
 	}
 
@@ -123,6 +144,7 @@ func (s *Server) BookmarkRepositoryGetBookmarkByID(bookmarkID string) (Bookmark,
 
 // BookmarkRepositoryDeleteBookmarkByID - Delete a specifc bookmark by its database id
 func (s *Server) BookmarkRepositoryDeleteBookmarkByID(bookmarkID string) (int64, error) {
+	// TODO: Perhaps remove associated tag if not used by other bookmarks
 	rows, err := s.DB.Query(context.Background(), "DElETE FROM bookmarks WHERE id=$1", bookmarkID)
 
 	if err != nil {
@@ -182,7 +204,7 @@ func (s *Server) TagsRepositoryGetTags() (Tags, error) {
 	tags := Tags{Tags: []Tag{}}
 
 	rows, err := s.DB.Query(context.Background(),
-		"SELECT id, name FROM tags")
+		"SELECT id, name FROM tags ORDER BY name")
 
 	if err != nil {
 		return tags, err

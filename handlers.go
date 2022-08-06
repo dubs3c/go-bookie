@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/netip"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -39,6 +41,25 @@ func getarticle(ctx context.Context, db *pgxpool.Pool, id int, url string) error
 	return nil
 }
 
+// isValidURL checks if submitted link is an URL. Does not allow IPs or basic auth.
+func isValidURL(link string) bool {
+	u, err := url.Parse(link)
+	if err != nil {
+		return false
+	}
+
+	if u.IsAbs() && u.Scheme == "https" || u.Scheme == "http" && u.Hostname() != "localhost" && u.User.String() == "" {
+		_, err := netip.ParseAddr(u.Hostname())
+		if err == nil {
+			return false
+		}
+
+		return true
+	}
+
+	return false
+}
+
 // CreateBookmark Create bookmark
 func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 	data := &CreateBookmarkRequest{}
@@ -56,9 +77,11 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 	LastInsertedID, err := s.BookmarkRepositoryInsert(data)
 
 	go func() {
-		err := getarticle(context.Background(), s.DB, LastInsertedID, data.URL)
-		if err != nil {
-			log.Printf("ERROR: Could not fetch website %s: %s", data.URL, err.Error())
+		if isValidURL(data.URL) {
+			err := getarticle(context.Background(), s.DB, LastInsertedID, data.URL)
+			if err != nil {
+				log.Printf("ERROR: Could not fetch website %s: %s", data.URL, err.Error())
+			}
 		}
 	}()
 
