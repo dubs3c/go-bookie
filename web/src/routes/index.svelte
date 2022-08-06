@@ -119,7 +119,7 @@ let active = true;
 				<div class="row">
 					<div class="col">
 						<h4>Tags</h4>
-						<Button on:buttonClick={ expandMe } small={true} info={true} fullWidth={true} value="List all tags"/>
+						<Button on:buttonClick={ expandMe } small={true} info={true} fullWidth={true} value="{active ? 'List all tags' : 'Hide all tags'}"/>
 						<br />
 						<br />
 						<div class="{active ? 'user-tag-list' : ''}">
