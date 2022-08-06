@@ -32,7 +32,11 @@ function expandMe() {
 
 async function filterBookmarks() {
 	// Reset current page to 1 to ensure when a new filter is made, we request page 1 first
-	$settingsStore.currentPage = 1
+	const url = new URL(window.location);
+	const page = url.searchParams.get("page")
+	if(page === null) {
+		$settingsStore.currentPage = 1
+	}
 	let paginatedObject: Pagination 
 	paginatedObject = await GetFilteredBookmarks(
 		$settingsStore.currentPage,
@@ -55,6 +59,8 @@ async function changePage(pageNumber: number) {
 	$settingsStore.pageSize = paginatedObject.limit
 	$settingsStore.currentPage = paginatedObject.page
 	$bookmarkStore = paginatedObject.data
+	let url: string = "/?page="+$settingsStore.currentPage;
+	history.pushState($settingsStore.currentPage, '', url)
 }
 
 onMount(async () => {
