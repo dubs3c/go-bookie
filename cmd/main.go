@@ -57,6 +57,8 @@ func main() {
 	}
 
 	r.Route("/v1", func(r chi.Router) {
+		r.Use(gobookie.Authentication(s))
+
 		r.Route("/bookmarks", func(r chi.Router) {
 			r.Get("/", s.ListBookmarks)
 			r.Post("/", s.CreateBookmark)
@@ -67,13 +69,26 @@ func main() {
 				r.Delete("/", s.DeleteBookmark)
 			})
 		})
+
 		r.Route("/tags", func(r chi.Router) {
 			r.Get("/", s.ListTags)
 			r.Post("/", s.CreateTag)
 			r.Delete("/", s.DeleteTag)
 			r.Put("/", s.UpdateTag)
 		})
+		r.Route("/users", func(r chi.Router) {
+			r.Use(gobookie.IsAdmin)
+			r.Get("/", s.ListUsers)
+			r.Post("/", s.CreateUser)
+			r.Delete("/", s.DeleteUser)
+			r.Put("/", s.UpdateUser)
+		})
+
+		r.Post("/logout", s.UserLogout)
 	})
+
+	// These endpoints do not require auth
+	r.Post("/login", s.UserLogin)
 
 	HTTPServer := &http.Server{
 		Addr:           "0.0.0.0:8080",

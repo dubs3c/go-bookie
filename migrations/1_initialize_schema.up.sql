@@ -1,6 +1,5 @@
 BEGIN;
 
-
 CREATE TABLE IF NOT EXISTS bookmarks (
     id          SERIAL PRIMARY KEY,
     title       TEXT DEFAULT "",

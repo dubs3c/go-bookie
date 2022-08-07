@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/mail"
 	"net/netip"
 	"net/url"
 	"reflect"
@@ -58,6 +59,97 @@ func isValidURL(link string) bool {
 	}
 
 	return false
+}
+
+// Only admin can run user APIs
+func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
+	user := &CreateUserRequest{}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
+		RespondWithError(w, 400, "Could not decode json")
+	}
+
+	if user.Password != user.VerifyPassword {
+		RespondWithError(w, 400, "Passwords does not match")
+	}
+
+	_, err := mail.ParseAddress(user.Email)
+	if err != nil {
+		RespondWithError(w, 400, "Email is not valid")
+	}
+
+	_, err = s.UserRepositoryCreate(user)
+
+	if err != nil {
+		log.Println(err)
+		RespondWithError(w, 500, "Could not create user")
+	}
+
+	RespondWithStatusCode(w, 201)
+
+}
+
+func (s *Server) ListUsers(w http.ResponseWriter, r *http.Request) {
+
+	users, err := s.UserRepositoryList()
+
+	if err != nil {
+		log.Println(err)
+		RespondWithError(w, 500, "Could not list users")
+		return
+	}
+
+	RespondWithJSON(w, 200, &users)
+}
+
+func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (s *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
+
+	// should check here if user has a cookie with correct token
+	// to avoid further processing
+
+	u := &UserLogin{}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	if err := json.NewDecoder(r.Body).Decode(u); err != nil {
+		RespondWithError(w, 400, "Could not decode json")
+		return
+	}
+
+	userId, err := s.UserRepositoryExists(u.Email, u.Password)
+
+	if err != nil {
+		log.Println(err)
+		RespondWithError(w, 500, "Could not attempt login")
+		return
+	}
+
+	if userId > 0 {
+		token, err := s.UserRepositoryLogin(userId)
+		if err != nil {
+			RespondWithError(w, 500, "Could not login")
+			return
+		}
+
+		w.Header().Add("Set-Cookie", "token="+token+" path=/; secure; HttpOnly; SameSite=Lax; Max-Age=604800")
+
+		RespondWithStatusCode(w, 200)
+	} else {
+		RespondWithStatusCode(w, 404)
+	}
+
+}
+
+func (s *Server) UserLogout(w http.ResponseWriter, r *http.Request) {
+
 }
 
 // CreateBookmark Create bookmark

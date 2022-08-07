@@ -17,6 +17,9 @@ docker run -e POSTGRES_PASSWORD=bookie -e POSTGRES_USER=bookie -e POSTGRES_DB=bo
 ```
 
 **Run Migrations**
+
+Install `migrate` from here [https://github.com/golang-migrate/migrate](https://github.com/golang-migrate/migrate).
+
 ```
 migrate -database postgres://bookie:bookie@localhost:5432/bookie?sslmode=disable -path migrations up
 ```

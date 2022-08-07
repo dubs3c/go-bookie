@@ -73,3 +73,29 @@ type Tag struct {
 type Tags struct {
 	Tags []Tag
 }
+
+type User struct {
+	ID          uint      `json:"id"`
+	Email       string    `json:"email"`
+	APIToken    string    `json:"api_token"`
+	IsAdmin     bool      `json:"is_admin"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	AccessToken string    `json:"access_token"`
+	LoggedInAt  time.Time `json:"loggedin_at"`
+}
+
+type Users struct {
+	Users []User
+}
+
+type CreateUserRequest struct {
+	Email          string `json:"email"`
+	Password       string `json:"password"`
+	VerifyPassword string `json:"verify_password"`
+}
+
+type UserLogin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
