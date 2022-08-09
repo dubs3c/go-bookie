@@ -48,6 +48,7 @@ const PageSettings = () => {
 export const settingsStore = PageSettings()
 export const bookmarkStore = writable([])
 export const tagStore = writable([])
+export const authenticated = writable(false);
 
 // store to handle the app state
 const appState = () => {
