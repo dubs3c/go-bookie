@@ -7,7 +7,7 @@
     
         <div class="row hr">
             <div class="col">
-                <h1><a href="/" style="text-decoration:none; color:turquoise;">SAMLA</a></h1>
+                <h1><a href="/dashboard" style="text-decoration:none; color:turquoise;">SAMLA</a></h1>
             </div>
             <nav>
                 <div class="col">

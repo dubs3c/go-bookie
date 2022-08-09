@@ -24,13 +24,14 @@ func Authentication(s *Server) func(next http.Handler) http.Handler {
 			if ok {
 				// Check if access token has expired
 				if time.Now().After(u.LoggedInAt.Add(time.Second * time.Duration(604800))) {
-
+					log.Println("after time check")
 					err := s.UserRepositoryDeleteAccessToken(u.AccessToken)
 					if err != nil {
+						log.Println(err)
 						http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 						return
 					}
-
+					log.Println("Access token expired for ", u.Email)
 					http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 					return
 				}
@@ -38,6 +39,7 @@ func Authentication(s *Server) func(next http.Handler) http.Handler {
 				ctx := context.WithValue(r.Context(), User{}, &u)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			} else {
+				log.Println("Token does not exist")
 				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
 			}

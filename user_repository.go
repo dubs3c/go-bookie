@@ -2,6 +2,7 @@ package gobookie
 
 import (
 	"context"
+	"log"
 
 	"github.com/georgysavva/scany/pgxscan"
 )
@@ -46,12 +47,13 @@ func (s *Server) UserRepositoryIsAuthenticatedByToken(token string) (User, bool)
 
 	var u User = User{}
 	err := s.DB.QueryRow(context.Background(),
-		`SELECT u.id, u.email, u.api_token, u.is_admin, u.created_at, u.modified_at, at.token AS access_token, at.created_at AS loggedin_at
+		`SELECT u.id, u.email, u.api_token, u.is_admin, u.created_at, u.updated_at, at.token, at.created_at
 	FROM access_tokens AS at
 	LEFT JOIN users AS u ON u.id = at.user_fk
-	WHERE at.token = $1 LIMIT 1;`, token).Scan(&u.ID, &u.Email, &u.APIToken, &u.IsAdmin, &u.CreatedAt, &u.AccessToken, &u.UpdatedAt)
+	WHERE at.token = $1 LIMIT 1;`, token).Scan(&u.ID, &u.Email, &u.APIToken, &u.IsAdmin, &u.CreatedAt, &u.UpdatedAt, &u.AccessToken, &u.LoggedInAt)
 
 	if err != nil {
+		log.Println(err)
 		return u, false
 	}
 

@@ -128,6 +128,10 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
+		if userId == 0 {
+			RespondWithError(w, 404, "Username or Password Incorrect")
+			return
+		}
 		RespondWithError(w, 500, "Could not attempt login")
 		return
 	}
@@ -139,7 +143,17 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.Header().Add("Set-Cookie", "token="+token+" path=/; secure; HttpOnly; SameSite=Lax; Max-Age=604800")
+		// set secure flag in prod
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "token",
+			Value:    token,
+			MaxAge:   604800,
+			HttpOnly: true,
+			Path:     "/",
+		})
+
+		//w.Header().Add("Set-Cookie", "token="+token+"; path=/; HttpOnly; SameSite=Lax; Max-Age=604800;")
 
 		RespondWithStatusCode(w, 200)
 	} else {

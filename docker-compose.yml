@@ -2,16 +2,26 @@ version: '3'
 
 services:
   web:
-    container_name: gobookie-web
+    image: nginx:1.23.1-alpine
+    volumes:
+    - ./nginx:/etc/nginx/conf.d/
+    ports:
+    - "0.0.0.0:8181:80"
+    environment:
+    - NGINX_PORT=80
+
+  frontend:
     image: node:18.7-alpine3.15
     working_dir: /app
     command: sh entrypoint.sh
     ports:
       - "0.0.0.0:3000:3000"
     volumes:
-      - ".:/app"
+      - "./web:/app"
     expose:
       - "3000"
+    depends_on:
+      - web
     #env_file:
     #  - /root/bookie.env
     #  - /root/bookie.db.env
@@ -21,12 +31,11 @@ services:
     volumes:
       - ".:/app"
     working_dir: /app
-    command: "sh -c 'migrate -database postgres://bookie:bookie@postgres:5432/bookie?sslmode=disable -path migrations up && go build cmd/main.go && ./main'"
+    command: "sh -c 'go build cmd/main.go && ./main'"
     ports:
       - "8080:8080"
     expose:
       - "8080"
-
     depends_on:
       - postgres
 
