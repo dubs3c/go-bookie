@@ -151,11 +151,12 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   604800,
 			HttpOnly: true,
 			Path:     "/",
+			SameSite: http.SameSiteStrictMode,
 		})
 
 		//w.Header().Add("Set-Cookie", "token="+token+"; path=/; HttpOnly; SameSite=Lax; Max-Age=604800;")
 
-		RespondWithStatusCode(w, 200)
+		RespondWithStatusCode(w, 302)
 	} else {
 		RespondWithStatusCode(w, 404)
 	}
