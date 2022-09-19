@@ -25,7 +25,7 @@ async function onLogin() {
         window.localStorage.setItem("authenticated", "true");
         goto("/dashboard")
     }).catch(error => {
-        console.log("error")
+        console.log("Login Error:")
         console.log(error)
     });
 }
