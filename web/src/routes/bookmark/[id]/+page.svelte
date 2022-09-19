@@ -1,35 +1,20 @@
-<script context="module">
-	/**
-	 * @type {import('@sveltejs/kit').Load}
-	 */
-	export async function load({ fetch, params }) {
-		const url = `http://localhost:8080/v1/bookmarks/`+ params.id;
-		const res = await fetch(url);
-
-		if (res.ok) {
-			return {
-				props: {
-					detail: await res.json()
-				}
-			};
-		}
-
-		return {
-			status: res.status,
-			error: new Error(`Could not load ${url}`)
-		};
-	}
-</script>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <script lang="ts">
-import Card from '../../components/card/Card.svelte';
-import Tag from '../../components/tag/Tag.svelte';
-import { goto } from '$app/navigation';
-import { AddTagToBookmark, DeleteTagFromBookmark } from '../../actions/TagAction.svelte';
-import { onMount } from 'svelte';
-import type { Bookmark } from '../../types/Bookmark';
+    //throw new Error("@migration task: Add data prop (https://github.com/sveltejs/kit/discussions/5774#discussioncomment-3292707)");
 
-export let detail: Bookmark;
+import Card from '../../../components/card/Card.svelte';
+import Tag from '../../../components/tag/Tag.svelte';
+import { goto } from '$app/navigation';
+import { AddTagToBookmark, DeleteTagFromBookmark } from '../../../actions/TagAction.svelte';
+import { onMount } from 'svelte';
+import type { Bookmark } from '../../../types/Bookmark';
+
+/** @type {import('./$types').PageData */
+export let data;
+
+let { detail: Bookmark } = data;
+
+//export let detail: Bookmark;
 
 let newTag: string =  ""
 
