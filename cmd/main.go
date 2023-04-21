@@ -36,12 +36,11 @@ func main() {
 	r.Use(middleware.Logger)
 
 	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"*"},
+		AllowedOrigins: []string{"http://*"},
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: false,
+		AllowedHeaders:   []string{"Accept", "Cookies", "Content-Type"},
+		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 

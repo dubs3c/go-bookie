@@ -151,12 +151,12 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   604800,
 			HttpOnly: true,
 			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
+			SameSite: http.SameSiteDefaultMode,
 		})
 
 		//w.Header().Add("Set-Cookie", "token="+token+"; path=/; HttpOnly; SameSite=Lax; Max-Age=604800;")
 
-		RespondWithStatusCode(w, 302)
+		RespondWithStatusCode(w, 200)
 	} else {
 		RespondWithStatusCode(w, 404)
 	}
@@ -169,6 +169,9 @@ func (s *Server) UserLogout(w http.ResponseWriter, r *http.Request) {
 
 // CreateBookmark Create bookmark
 func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
+
+	u := r.Context().Value(User{}).(*User)
+
 	data := &CreateBookmarkRequest{}
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
@@ -181,7 +184,7 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	LastInsertedID, err := s.BookmarkRepositoryInsert(data)
+	LastInsertedID, err := s.BookmarkRepositoryInsert(data, u.ID)
 
 	go func() {
 		if isValidURL(data.URL) {
@@ -193,6 +196,7 @@ func (s *Server) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	if err != nil {
+		log.Println(err)
 		RespondWithError(w, 500, "Could not create bookmark")
 		return
 	}

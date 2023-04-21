@@ -8,9 +8,9 @@ import (
 )
 
 // BookmarkRepositoryInsert - Insert bookmark into database
-func (s *Server) BookmarkRepositoryInsert(bookmark *CreateBookmarkRequest) (int, error) {
+func (s *Server) BookmarkRepositoryInsert(bookmark *CreateBookmarkRequest, userId uint) (int, error) {
 	var last int = 0
-	err := s.DB.QueryRow(context.Background(), "INSERT INTO bookmarks(url) values($1) RETURNING id", bookmark.URL).Scan(&last)
+	err := s.DB.QueryRow(context.Background(), "INSERT INTO bookmarks(url, user_fk) values($1, $2) RETURNING id", bookmark.URL, userId).Scan(&last)
 	return last, err
 }
 

@@ -5,7 +5,8 @@ import {baseURL} from "./../config.dev.js";
 export async function CreateBookmark(url: string) {
 	const response = await fetch(baseURL + "/v1/bookmarks", {
 		method: 'POST',
-		body: JSON.stringify({url})
+		body: JSON.stringify({url}),
+        credentials: "include"
 	})
 
 	if (response.ok) {
@@ -20,7 +21,8 @@ export async function GetBookmarks(page: number) {
 		page = 1
 	}
 	const response = await fetch(baseURL + "/v1/bookmarks?page=" + page, {
-		method: 'GET'
+		method: 'GET',
+        credentials: "include"
 	})
 
 	if (response.ok) {
@@ -60,7 +62,8 @@ export async function GetFilteredBookmarks(page: number, deleted: boolean, archi
 	}
 
 	const response = await fetch(baseURL + url, {
-		method: 'GET'
+		method: 'GET',
+        credentials: "include"
 	})
 
 	if (response.ok) {
@@ -72,7 +75,8 @@ export async function GetFilteredBookmarks(page: number, deleted: boolean, archi
 
 export async function DeleteBookmark(id: number) {
 	await fetch(baseURL + "/v1/bookmarks/"+id, {
-		method: "DELETE"
+		method: "DELETE",
+        credentials: "include"
 	}).then(response => {
 		if(response.ok) {
 			return response.json();
@@ -86,7 +90,8 @@ export async function DeleteBookmark(id: number) {
 export async function ToggleStatus(id: number, deleted: boolean, archived: boolean) {
 	await fetch(baseURL + "/v1/bookmarks/"+id, {
 		method: "PATCH",
-		body: JSON.stringify({deleted, archived})
+		body: JSON.stringify({deleted, archived}),
+        credentials: "include"
 	}).then(response => {
 		if(response.ok) {
 			return response.json();
@@ -101,7 +106,8 @@ export async function ArchiveBookmark(id: number) {
 	let archived = true
 	await fetch(baseURL + "/v1/bookmarks/"+id, {
 		method: "PATCH",
-		body: JSON.stringify({archived})
+		body: JSON.stringify({archived}),
+        credentials: "include"
 	}).then(response => {
 		if(response.ok) {
 			return response.json();

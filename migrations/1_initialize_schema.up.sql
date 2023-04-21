@@ -2,10 +2,10 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS bookmarks (
     id          SERIAL PRIMARY KEY,
-    title       TEXT DEFAULT "",
-    description TEXT DEFAULT "",
-    body        TEXT DEFAULT "",
-    image       VARCHAR(150) DEFAULT "",
+    title       TEXT DEFAULT '',
+    description TEXT DEFAULT '',
+    body        TEXT DEFAULT '',
+    image       VARCHAR(150) DEFAULT '',
     url         TEXT NOT NULL,
     archived    BOOLEAN DEFAULT FALSE,
     deleted     BOOLEAN DEFAULT FALSE,

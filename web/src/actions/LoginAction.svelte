@@ -6,7 +6,8 @@
 
         const response = await fetch(baseURL + "/login", {
             method: 'POST',
-            body: JSON.stringify({email, password})
+            body: JSON.stringify({email, password}),
+            credentials: 'include'
         })
 
         if (response.ok) {

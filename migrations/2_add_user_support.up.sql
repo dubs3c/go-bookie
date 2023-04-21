@@ -22,10 +22,10 @@ CREATE TABLE IF NOT EXISTS access_tokens (
     FOREIGN KEY (user_fk) REFERENCES users(id) ON DELETE CASCADE
 );
 
-/* useful if applying to DB where data already exists
+-- useful if applying to DB where data already exists
 INSERT INTO users(email, password) VALUES('admin@samla.app', '1234');
 ALTER TABLE IF EXISTS bookmarks ADD COLUMN user_fk INTEGER NOT NULL DEFAULT 1;
-*/
+
 
 ALTER TABLE IF EXISTS bookmarks ADD CONSTRAINT fk_users_bookmarks FOREIGN KEY (user_fk) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE IF EXISTS bookmarks ALTER COLUMN user_fk DROP DEFAULT;
