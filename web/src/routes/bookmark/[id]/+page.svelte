@@ -9,12 +9,16 @@ import { AddTagToBookmark, DeleteTagFromBookmark } from '../../../actions/TagAct
 import { onMount } from 'svelte';
 import type { Bookmark } from '../../../types/Bookmark';
 
-/** @type {import('./$types').PageData */
+/** @type {import('./$types').PageData} */
 export let data;
 
-let { detail: Bookmark } = data;
 
-//export let detail: Bookmark;
+console.log("hejhejhej");
+let detail: Bookmark = data.data
+
+console.log(detail)
+
+//export let data: Bookmark;
 
 let newTag: string =  ""
 
@@ -24,7 +28,7 @@ $: currentTags = []
 
 async function onKeyPress(event) {
     if(event.charCode === 13) {
-        await AddTagToBookmark(detail.id, newTag)
+        await AddTagToBookmark(data.id, newTag)
         .then(() => {
             if(currentTags[0] === "") {
                 currentTags = [newTag]
